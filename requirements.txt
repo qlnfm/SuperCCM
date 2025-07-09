@@ -1,0 +1,5 @@
+aiccm
+gradio
+matplotlib==3.7.0
+numpy<2.0.0
+scikit-learn
