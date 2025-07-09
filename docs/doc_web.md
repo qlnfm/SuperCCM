@@ -1,4 +1,4 @@
-# 通过Web应用程序与SuperCCM交互
+# Interact with SuperCCM through a Web application
 
 1. Start the web service
 

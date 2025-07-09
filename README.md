@@ -42,7 +42,7 @@ Click the link below to quickly jump to the corresponding section of the documen
  - ✨️ [Auto Analysis](docs/doc_auto_analysis.md)
  - ✨️ [Visualization](docs/doc_vis.md)
  - ✨️ [Bulk Analysis](docs/doc_bulk_analysis.md)
- - ✨️ [Web Application](docs/doc_bulk_analysis.md)
+ - ✨️ [Web Application](docs/doc_web.md)
 
 
 ## 📄 License

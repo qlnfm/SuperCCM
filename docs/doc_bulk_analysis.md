@@ -1,4 +1,4 @@
-# 批量分析
+# Bulk Analysis
 
 The following is an example of batch analysis and saving of visual images:
 ```python
