@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ## ⚡ Quickly Start
 
 ```python
-from superccm import SuperCCM  # 从superccm包中导入SuperCCM对象
+from superccm import SuperCCM  # Import the superccm object from the SuperCCM package
 import cv2
 
 image = cv2.imread('path/to/your/image.png')  # Read the test image
