@@ -20,6 +20,10 @@ conda activate superccm
 pip install -r requirements.txt
 ```
 
+## 🌟 在线体验
+
+> https://huggingface.co/spaces/jugking6688/SuperCCM
+
 ## ⚡ 快速开始
 
 ```python

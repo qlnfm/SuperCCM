@@ -1,3 +1,14 @@
+---
+title: SuperCCM Web Application
+emoji: 🚀
+colorFrom: indigo
+colorTo: blue
+sdk: gradio
+sdk_version: "5.35.0"
+app_file: app.py
+pinned: false
+---
+
 <div align="center">
   <img src="docs/assets/superccm.png" alt="description" />
 
@@ -11,6 +22,9 @@ English | [简体中文](./README_cn.md)
 ✨️SuperCCM is an open-source Python framework for processing and analyzing corneal nerve images from corneal confocal microscopy (CCM).
 By inputting a CCM corneal nerve image, SuperCCM can automatically process the image and output various commonly used morphological parameters in clinical practice.
 
+## 🌟 Using online
+
+> https://huggingface.co/spaces/jugking6688/SuperCCM
 
 ## ❇️ Environmental Preparation
 
