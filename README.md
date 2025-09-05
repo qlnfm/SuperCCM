@@ -1,30 +1,15 @@
----
-title: SuperCCM Web Application
-emoji: 🚀
-colorFrom: indigo
-colorTo: blue
-sdk: gradio
-sdk_version: "5.35.0"
-app_file: app.py
-pinned: false
----
-
 <div align="center">
   <img src="docs/assets/superccm.png" alt="description" />
 
 <hr>
 
-English | [简体中文](./README_cn.md)
+[English](./README.md) | 简体中文
 </div>
 
 ## 🚀 Introduction
 
-✨️SuperCCM is an open-source Python framework for processing and analyzing corneal nerve images from corneal confocal microscopy (CCM).
-By inputting a CCM corneal nerve image, SuperCCM can automatically process the image and output various commonly used morphological parameters in clinical practice.
-
-## 🌟 Using online
-
-> https://huggingface.co/spaces/jugking6688/SuperCCM
+✨️SuperCCM is an open-source Python framework for processing and analyzing corneal nerve images from corneal confocal microscopy (CCM). By inputting a CCM corneal nerve image, SuperCCM can automatically process the image and output various commonly used morphological parameters in clinical practice.
+### 🏠Github: https://github.com/qlnfm/SuperCCM
 
 ## ❇️ Environmental Preparation
 
@@ -33,31 +18,30 @@ conda create -n superccm python=3.10 -y
 conda activate superccm
 pip install -r requirements.txt
 ```
+ - Install from PyPI
+```shell
+pip install superccm
+```
+
+## 🌟 Using online
+
+> https://huggingface.co/spaces/jugking6688/SuperCCM
 
 ## ⚡ Quickly Start
 
 ```python
-from superccm import SuperCCM  # Import the superccm object from the SuperCCM package
-import cv2
+from superccm import SuperCCM
 
-image = cv2.imread('path/to/your/image.png')  # Read the test image
-# Of course, you can also obtain a picture object in any way you like
-# Make sure the image is an np.ndarray object of shape (384, 384, 3) and type uint8
-ccm = SuperCCM()  # Instantiate the SuperCCM object
-metrics = ccm(image)  # Process and analyze the image, and return a dictionary storing various morphological parameters
-print(metrics)  # Print parameters
+ccm = SuperCCM()
+metrics = ccm.run('your/img/path')
+print(metrics)
 ```
+ - Just a few lines of commands are needed.
 
 ## 📖 Document Tutorial
 
-We offer a wealth of documentation and tutorials for users to delve deeply into SuperCCM.
-Click the link below to quickly jump to the corresponding section of the document.
-
- - ✨️ [Auto Analysis](docs/doc_auto_analysis.md)
- - ✨️ [Visualization](docs/doc_vis.md)
- - ✨️ [Bulk Analysis](docs/doc_bulk_analysis.md)
- - ✨️ [Web Application](docs/doc_web.md)
-
+ - ✨️ [Advanced Tutorial](docs/doc1.md): Gain a thorough understanding of the use of SuperCCM
+ - ✨️ [Module writing](docs/doc2.md): Learn how to customize the workflow and integrate your developed algorithms into SuperCCM
 
 ## 📄 License
 

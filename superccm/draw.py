@@ -1,8 +1,7 @@
 import cv2
 
-from .morphology import NerveImage
-from .graph import NerveGraph
-from .common import get_canvas
+from .modules.topology.graph import NerveGraph
+from .modules.common import get_canvas
 
 from typing import Literal
 
@@ -10,7 +9,6 @@ BACKGROUND_TYPE = Literal['empty', 'image']
 
 
 def draw(
-        nerve_image: NerveImage,
         nerve_graph: NerveGraph,
         *,
         main_edge_color: tuple[int, int, int] = (0, 0, 255),
@@ -28,7 +26,6 @@ def draw(
 ):
     """
     Visualization method
-    :param nerve_image: NerveImage object
     :param nerve_graph: NerveGraph object
     :param main_edge_color: The color of the main nerve fibers
     :param side_edge_color: The color of the side nerve fibers
@@ -45,11 +42,13 @@ def draw(
     :param end_node_size: The radius (in pixels) of the size of the end nodes
     :return:
     """
+    nerve_image = nerve_graph.nerve_image
     match background:
         case 'empty':
             canvas = get_canvas(3)
         case 'image':
             canvas = nerve_image.image.copy()
+            canvas = cv2.cvtColor(canvas, cv2.COLOR_GRAY2BGR)
         case _:
             raise TypeError
 

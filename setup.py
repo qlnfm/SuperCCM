@@ -8,7 +8,7 @@ def parse_requirements(filename):
 
 setup(
     name='superccm',
-    version='0.1.1',
+    version='0.2.2',
     author='Qincheng Qiao',
     author_email='jugking6688@gmail.com',
     description='An Open-Source Python Toolkit for Automated Quantification of Corneal Nerve Fibers in Confocal Microscopy Images',
@@ -21,6 +21,9 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Topic :: Scientific/Engineering :: Medical Science Apps.'
     ],
+    package_data={
+        "superccm": ["modules/segment/ccm.onnx"],
+    },
     python_requires='>=3.9',
     install_requires=parse_requirements('requirements.txt'),
     include_package_data=True

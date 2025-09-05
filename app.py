@@ -6,10 +6,10 @@ from superccm import SuperCCM, draw
 
 def analysis(image):
     ccm = SuperCCM()
-    metrics = ccm(image)
+    metrics = ccm.run(image)
     df = pd.DataFrame(metrics.items(), columns=['Parameter', 'Value'])
-    ccm_obj = ccm.nerve_image, ccm.nerve_graph
-    image_vis = cv2.cvtColor(draw(*ccm_obj), cv2.COLOR_BGR2RGB)
+    ccm_obj = ccm.graph
+    image_vis = cv2.cvtColor(draw(ccm_obj), cv2.COLOR_BGR2RGB)
     return df, ccm_obj, image_vis
 
 
@@ -65,7 +65,7 @@ def vis(
         else:
             kwargs[k] = v
 
-    return cv2.cvtColor(draw(*ccm_obj, **kwargs), cv2.COLOR_BGR2RGB)
+    return cv2.cvtColor(draw(ccm_obj, **kwargs), cv2.COLOR_BGR2RGB)
 
 
 with gr.Blocks(

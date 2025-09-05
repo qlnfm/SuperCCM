@@ -11,6 +11,7 @@
 ✨️SuperCCM是一个开源的，用于处理和分析角膜共聚焦显微镜(CCM)的角膜神经图像的Python框架。
 通过输入一张CCM角膜神经图像，SuperCCM可以全自动的对图像进行处理，并输出各种临床中常用的形态学参数。
 
+### 🏠Github: https://github.com/qlnfm/SuperCCM
 
 ## ❇️ 环境准备
 
@@ -18,6 +19,10 @@
 conda create -n superccm python=3.10 -y
 conda activate superccm
 pip install -r requirements.txt
+```
+ - 从PyPI安装
+```shell
+pip install superccm
 ```
 
 ## 🌟 在线体验
@@ -27,27 +32,18 @@ pip install -r requirements.txt
 ## ⚡ 快速开始
 
 ```python
-from superccm import SuperCCM  # 从superccm包中导入SuperCCM对象
-import cv2
+from superccm import SuperCCM
 
-image = cv2.imread('path/to/your/image.png')  # 读取测试图片
-# 当然，你也可以用任何你喜欢的方式得到一个图片对象
-# 确保图片是形状为(384, 384, 3)，类型为uint8的np.ndarray对象
-ccm = SuperCCM()  # 实例化SuperCCM对象
-metrics = ccm(image)  # 处理并分析图像，返回一个储存有各个形态学参数的字典
-print(metrics)  # 打印参数
+ccm = SuperCCM()
+metrics = ccm.run('your/img/path')
+print(metrics)
 ```
+ - 只需要几行命令。
 
 ## 📖 文档教程
 
-我们提供了丰富的文档与教程供用户深入学习SuperCCM。
-点击下方链接即可快速跳转至相应部分的文档。
-
- - ✨️ [自动分析](docs/doc_cn_auto_analysis.md)
- - ✨️ [可视化](docs/doc_cn_vis.md)
- - ✨️ [批量分析](docs/doc_cn_bulk_analysis.md)
- - ✨️ [Web应用程序](docs/doc_cn_bulk_analysis.md)
-
+ - ✨️ [进阶教程](docs/doc1_cn.md): 深入了解SuperCCM的使用
+ - ✨️ [模块编写](docs/doc2_cn.md): 学习如何自定义工作流，将您开发的算法整合到SuperCCM
 
 ## 📄 许可协议
 

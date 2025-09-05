@@ -1,9 +1,9 @@
 from superccm import SuperCCM, draw
-import cv2
 import aiccm
 
-image = cv2.imread('docs/assets/auto_analysis/img.jpg')
-ccm = SuperCCM()
-metrics = ccm(image)
-print(metrics)
-aiccm.show_image(draw(ccm.nerve_image, ccm.nerve_graph))
+superccm = SuperCCM()
+file_path = 'your/img/path'
+rst = superccm.run(file_path)
+print(rst)
+image = draw(superccm.graph)
+aiccm.show_image(image)
