@@ -11,6 +11,8 @@ _flags = {
     'color': cv2.IMREAD_COLOR
 }
 
+CCM_IMAGE_SHAPE = (384, 384)
+
 
 def _read_image(
         any_input: str | Path | np.ndarray | bytes | Image.Image,
@@ -71,6 +73,9 @@ def _read_image(
 
     if img is None or img.size == 0:
         raise IOError("Decoded image is empty or invalid.")
+
+    height, width = CCM_IMAGE_SHAPE
+    img = img[:height, :width]
 
     return img
 
