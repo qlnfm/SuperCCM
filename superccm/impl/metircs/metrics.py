@@ -1,14 +1,13 @@
-from .base import BaseModule
 import networkx as nx
 import numpy as np
 import cv2
 
-from .topology.graph import NerveGraph
-from .topology.morphology import NerveImage
-from .common import get_canvas
-from .external.bfs import find_shortest_path
-from .external.tc import get_tc
-from .external.fracdim import fractal_dimension
+from ..topology.graph import NerveGraph
+from ..topology.morphology import NerveImage
+from ..common import get_canvas
+from .bfs import find_shortest_path
+from .tc import get_tc
+from .fracdim import fractal_dimension
 
 from typing import Literal, Sequence
 
@@ -142,7 +141,7 @@ def get_fractal_dimension(n_image: NerveImage, n_graph: NerveGraph):
     return fracdim
 
 
-def get_metrics(n_graph: NerveGraph, digit=3):
+def get_metrics(n_graph: NerveGraph, digit=3) -> dict[str, float]:
     n_image = n_graph.nerve_image
     main_nerves = get_main_nerves(n_image, n_graph)
     metrics = {
@@ -202,22 +201,6 @@ def get_metrics(n_graph: NerveGraph, digit=3):
 
     return metrics
 
-
-class MetricsModule(BaseModule):
-    """
-    This is a module used for quantitatively calculating various CCM parameters.
-    It accepts a NerveGraph object and then outputs a dictionary containing the names
-    and corresponding values of each parameter.
-    """
-    def __init__(self):
-        super().__init__()
-        self.name = 'metrics'
-        self.output_name = 'metrics'
-
-    def __call__(self, *args, **kwargs) -> dict[str, float | int]:
-        if not args:
-            raise ValueError("An input is required.")
-        return get_metrics(*args, **kwargs)
 
 
 

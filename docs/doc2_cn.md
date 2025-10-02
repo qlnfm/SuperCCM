@@ -1,119 +1,124 @@
 # 🎇SuperCCM 自定义模块与工作流
 
 SuperCCM允许将你的算法集成到它的工作流中。
-> 如果你不想亲自动手，请联系[我](jugking6688@gmail.com)[jugking6688@gmail.com]，我会在24小时内回复。
 
 ## 基础知识: SuperCCM是如何工作的?
 
-SuperCCM是通过顺序拼接模块(module)来执行任务的，
-并且通过工作流(workflow)来控制具体的参数。
-默认情况下，模块列表和工作流分别为:
+SuperCCM是通过将每个模块(Module)整合到工作流(Workflow)中来执行任务的。
+默认情况下，模块列表为:
+
+`superccm/impl/modules.py`
 
 ```python
-from typing import Any
-from superccm.modules import (
-    ReadImageModule, SegmentModule, SkeletonizeModule, GraphifyModule, MetricsModule
+from ..core import Module
+
+from .io.read import read_image
+from .segment.segment import CornealNerveSegmenter
+from .skeleton.skeletonize import get_skeleton
+from .topology.graphify import graphify
+from .metircs.metrics import get_metrics
+
+
+class ReadModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = read_image
+
+
+class SegModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = CornealNerveSegmenter
+
+
+class SkelModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = get_skeleton
+
+
+class GraphifyModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = graphify
+
+
+class MeasureModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = get_metrics
+```
+
+每个特定的模块继承自`Module`类，Author和Version定义了作者和版本号的信息。
+具体的功能实现在Function类属性定义，它接受两种输入:
+
+1. 函数(Callable对象)
+2. 实现了__call__方法的类(并非实例)
+
+默认工作流则为:
+
+`superccm/default.py`
+
+```python
+from .core import WorkFlow
+from .impl.modules import (
+    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
 )
 
-default_modules = [
-    ReadImageModule,
-    SegmentModule,
-    SkeletonizeModule,
-    GraphifyModule,
-    MetricsModule,
-]
 
-
-def default_workflow(img) -> dict[str, tuple[Any]]:
-    return {
-        'read': (img, 'gray'),
-        'segment': ('[Data]raw_image',),
-        'skeletonize': ('[Data]binary_image',),
-        'graphify': ('[Data]raw_image', '[Data]binary_image', '[Data]skeleton_image'),
-        'metrics': ('[Data]nerve_graph',),
-    }
-```
-
-举个例子，对于模块`SegmentModule`来说，它用于执行二值化图像任务:
-
-```python
-from superccm.modules.base import BaseModule
-
-
-class SegmentModule(BaseModule):
-    """
-    A module used for binarizing CCM images,
-    This module is expected to accept input in the format of (384, 384, 3),
-    and the output format is (384, 384), with values of 0 or 255.
-    """
+class DefaultWorkFlow(WorkFlow):
+    """ Default Workflow of SuperCCM Ver 0.3.0 """
+    Author = 'Official'
+    Version = '0.3.0'
+    ReadModule = ReadModule
+    SegModule = SegModule
+    SkelModule = SkelModule
+    GraphifyModule = GraphifyModule
+    MeasureModule = MeasureModule
 
     def __init__(self):
-        super().__init__()
-        self.name = 'segment'
-        self.output_name = 'binary_image'
+        self.read_module = self.ReadModule()
+        self.seg_module = self.SegModule()
+        self.skel_module = self.SkelModule()
+        self.grfy_module = self.GraphifyModule()
+        self.meas_module = self.MeasureModule()
+        self.graph = None
 
-    def __call__(self, *args, **kwargs) -> np.ndarray:
-        if not args:
-            raise ValueError("An input is required.")
-        return _get_binary(*args, **kwargs)
+    def run(self, image_input):
+        image = self.read_module(image_input)
+        binary = self.seg_module(image)
+        skeleton = self.skel_module(binary)
+        graph = self.grfy_module(image, binary, skeleton)
+        self.graph = graph
+        metrics = self.meas_module(graph)
+        return metrics
 ```
 
-- `SegmentModule`继承于`BaseModule`，这是一个抽象基类，
-  要求模块有一个`__call__`方法，并且定义好`self.name`和`self.output_name`两个实例属性。
-- `__call__`方法用于执行具体的功能，此处`_get_binary`用于完成二值化方法。
-- `self.name`代表模块的名称，不要与其他模块重名。
-- `self.output_name`代表模块输出的名称，将储存于一个共享的字典中。
+同样的，在类属性处定义了Author和Version。
+此外，还有额外的类属性用于挂载Module。
+> 注意，模块的类名和WorkFlow的类属性不必重名，此处仅为特例。
 
-当我们实例化SuperCCM并且进行调用时:
+在__init__方法中将这些Module实例化，并实现一些额外的、自定义的逻辑。
+
+在run方法中具体定义每个Module实例的输入输出和执行顺序。
+
+假如我们尝试打印DefaultWorkFlow:
 
 ```python
-from superccm import SuperCCM
-from superccm.workflow import default_modules, default_workflow
+from superccm import DefaultWorkFlow
 
-superccm = SuperCCM(
-    modules=default_modules,
-    workflow=default_workflow,
-)
-file_path = 'your/img/path'
-rst = superccm.run(file_path)
+wf = DefaultWorkFlow()
+print(wf)
 ```
 
-此时，superccm.run接收的参数将会原封不动的传递给workflow，
-然后得到了其返回的具体的dict对象，用于指明每个模块所接收的输入。
-
-SuperCCM顺序执行modules中的模块，并从workflow中获取其输入，
-
-```python
-class ReadImageModule(BaseModule):
-    """
-    A module for reading images, supporting multiple input types (file paths, URLs, numpy arrays, PIL images, etc.),
-    and finally returning in the numpy array format of OpenCV.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.name = 'read'
-        self.output_name = 'raw_image'
-
-    def __call__(self, *args, **kwargs) -> np.ndarray:
-        if not args:
-            raise ValueError("An input is required.")
-        return _read_image(*args, **kwargs)
+```text
+<DefaultWorkFlow> Author: [Official] Version = 0.3.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
+ - <ReadModule> Author: [default] Version = 0.1.0
+ - <SegModule> Author: [default] Version = 0.1.0
+ - <SkelModule> Author: [default] Version = 0.1.0
+ - <GraphifyModule> Author: [default] Version = 0.1.0
+ - <MeasureModule> Author: [default] Version = 0.1.0
 ```
-
-例如对于第一个`ReadImageModule`来说，其`self.name`为`read`，
-其输入为:`(img, 'gray')`
-`img`是动态的，由刚刚传入的参数决定，`gray`则为设定的缺省值。
-
-由于`self.output_name`为`raw_image`，其输出将被储存在`superccm.data['raw_image']`。
-
-来到下一个模块`SegmentModule`，它需要获取到上一步读入的原始图像，所以在workflow中写作`[Data]raw_image`。
-
-SuperCCM会特殊识别以`[Data]`开头的字符串，将其转为`superccm.data`中储存的值而非字符串本身。
-
-> 以上介绍了SuperCCM的基本工作原理。
-> 
-> 没有看懂？让我们来看两个具体的例子。
 
 ## 例子1: 改进二值化方法
 
@@ -129,61 +134,93 @@ def sota_ccm_segment(image: np.ndarray) -> np.ndarray:
     pass
 ```
 
-然后，你需要编写一个新的模块:
+或者`SotaCcmSegmenter`类:
 
 ```python
-from superccm.modules.base import BaseModule
+import numpy as np
 
 
-class SOTASegmentModule(BaseModule):
+class SotaCcmSegmenter:
     def __init__(self):
-        super().__init__()
-        self.name = 'sota_segment'  # your module name 
-        self.output_name = 'binary_image'
+        self.model = 'load/your/model/checkpoint'
 
-    def __call__(self, *args, **kwargs) -> np.ndarray:
-        if not args:
-            raise ValueError("An input is required.")
-        return sota_ccm_segment(*args, **kwargs)
+    def seg(self, image: np.ndarray) -> np.ndarray:
+        pass
 ```
 
-此后，更新模块列表和工作流程:
+此时，你有三种方法将其集成在SuperCCM中:
+
+### 1. 猴子补丁(Monkey Patching)
 
 ```python
-from typing import Any
-from superccm.modules import (
-    ReadImageModule, SkeletonizeModule, GraphifyModule, MetricsModule
-)
+from superccm import DefaultWorkFlow
 
-your_modules = [
-    ReadImageModule,
-    SOTASegmentModule,  # your module
-    SkeletonizeModule,
-    GraphifyModule,
-    MetricsModule,
-]
-
-
-def your_workflow(img) -> dict[str, tuple[Any]]:
-    return {
-        'read': (img, 'gray'),
-        'sota_segment': ('[Data]raw_image',),  # update your module name
-        'skeletonize': ('[Data]binary_image',),
-        'graphify': ('[Data]raw_image', '[Data]binary_image', '[Data]skeleton_image'),
-        'metrics': ('[Data]nerve_graph',),
-    }
+DefaultWorkFlow.SegModule.Function = sota_ccm_segment
+# DefaultWorkFlow.SegModule.Function = SotaCcmSegmenter
+wf = DefaultWorkFlow()
+rst = wf.run('test.jpg')
 ```
 
-就可以正常使用了。
-```python
-from superccm import SuperCCM
+### 2. 定义新模块
 
-superccm = SuperCCM(
-    modules=your_modules,
-    workflow=your_workflow,
+然后再打一个猴子补丁。
+
+```python
+from superccm import Module, DefaultWorkFlow
+
+class MySegModule(Module):
+    Author = 'You'
+    Version = '1.0.0'
+    Function = sota_ccm_segment
+    # Function = SotaCcmSegmenter
+
+DefaultWorkFlow.SegModule = MySegModule
+```
+此时再打印DefaultWorkFlow:
+```text
+<DefaultWorkFlow> Author: [Official] Version = 0.3.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
+ - <ReadModule> Author: [default] Version = 0.1.0
+ - <MySegModule> Author: [You] Version = 1.0.0
+ - <SkelModule> Author: [default] Version = 0.1.0
+ - <GraphifyModule> Author: [default] Version = 0.1.0
+ - <MeasureModule> Author: [default] Version = 0.1.0
+```
+
+### 3. 定义新工作流
+
+继承WorkFlow抽象类。
+```python
+from superccm import WorkFlow
+from .impl.modules import (
+    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
 )
-file_path = 'your/img/path'
-rst = superccm.run(file_path)
+
+class MyWorkFlow(WorkFlow):
+    """ This is my workflow :) """
+    Author = 'Me'
+    Version = '999.999.999'
+    ReadModule = ReadModule
+    SegModule = MySegModule
+    SkelModule = SkelModule
+    GraphifyModule = GraphifyModule
+    MeasureModule = MeasureModule
+
+    def __init__(self):
+        self.read_module = self.ReadModule()
+        self.seg_module = self.SegModule()
+        self.skel_module = self.SkelModule()
+        self.grfy_module = self.GraphifyModule()
+        self.meas_module = self.MeasureModule()
+        self.graph = None
+
+    def run(self, image_input):
+        image = self.read_module(image_input)
+        binary = self.seg_module(image)
+        skeleton = self.skel_module(binary)
+        graph = self.grfy_module(image, binary, skeleton)
+        self.graph = graph
+        metrics = self.meas_module(graph)
+        return metrics
 ```
 
 
@@ -201,62 +238,52 @@ def ccm_preprocess(image: np.ndarray) -> np.ndarray:
     pass
 ```
 
-然后，你需要编写一个新的模块:
-
+定义新模块:
 ```python
-from superccm.modules.base import BaseModule
+from superccm import Module
 
+class MyPrepModule(Module):
+    Author = 'Who?'
+    Version = '1.0.0'
+    Function = ccm_preprocess
+```
 
-class PreprocessModule(BaseModule):
+定义工作流:
+```python
+from superccm import WorkFlow
+from .impl.modules import (
+    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+)
+from yourscript import MyPrepModule
+
+class MyWorkFlow(WorkFlow):
+    """ This is my workflow :) """
+    Author = 'Who?'
+    Version = '123.456.789'
+    ReadModule = ReadModule
+    PrepModule = MyPrepModule
+    SegModule = SegModule
+    SkelModule = SkelModule
+    GraphifyModule = GraphifyModule
+    MeasureModule = MeasureModule
+
     def __init__(self):
-        super().__init__()
-        self.name = 'preprocess'  # your module name 
-        self.output_name = 'preprocessed_image'
+        self.read_module = self.ReadModule()
+        self.prep_module = self.PrepModule()  # Here
+        self.seg_module = self.SegModule()
+        self.skel_module = self.SkelModule()
+        self.grfy_module = self.GraphifyModule()
+        self.meas_module = self.MeasureModule()
+        self.graph = None
 
-    def __call__(self, *args, **kwargs) -> np.ndarray:
-        if not args:
-            raise ValueError("An input is required.")
-        return ccm_preprocess(*args, **kwargs)
+    def run(self, image_input):
+        image = self.read_module(image_input)
+        image_prep = self.prep_module(image)
+        binary = self.seg_module(image_prep)
+        skeleton = self.skel_module(binary)
+        graph = self.grfy_module(image_prep, binary, skeleton)
+        self.graph = graph
+        metrics = self.meas_module(graph)
+        return metrics
 ```
 
-此后，更新模块列表和工作流程:
-
-```python
-from typing import Any
-from superccm.modules import (
-    ReadImageModule, SegmentModule, SkeletonizeModule, GraphifyModule, MetricsModule
-)
-from your_pyscript import PreprocessModule
-
-default_modules = [
-    ReadImageModule,
-    PreprocessModule,  # your module
-    SegmentModule,
-    SkeletonizeModule,
-    GraphifyModule,
-    MetricsModule,
-]
-
-
-def default_workflow(img) -> dict[str, tuple[Any]]:
-    return {
-        'read': (img, 'gray'),
-        'preprocess': ('[Data]raw_image',),  # insert your module name
-        'segment': ('[Data]preprocessed_image',),
-        'skeletonize': ('[Data]binary_image',),
-        'graphify': ('[Data]raw_image', '[Data]binary_image', '[Data]skeleton_image'),
-        'metrics': ('[Data]nerve_graph',),
-    }
-```
-
-就可以正常使用了。
-```python
-from superccm import SuperCCM
-
-superccm = SuperCCM(
-    modules=your_modules,
-    workflow=your_workflow,
-)
-file_path = 'your/img/path'
-rst = superccm.run(file_path)
-```

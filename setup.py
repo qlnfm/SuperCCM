@@ -8,7 +8,7 @@ def parse_requirements(filename):
 
 setup(
     name='superccm',
-    version='0.2.3',
+    version='0.3.0',
     author='Qincheng Qiao',
     author_email='jugking6688@gmail.com',
     description='An Open-Source Python Toolkit for Automated Quantification of Corneal Nerve Fibers in Confocal Microscopy Images',

@@ -4,8 +4,9 @@ from scipy.ndimage import label
 
 from typing import Literal, Union, Sequence
 
-from superccm.modules.common import get_canvas
+from ..common import get_canvas
 from .component import SkeletonComponent
+from .histogram_matching import histogram_standardization
 
 CLASSIFY_KERNEL = np.array([
     [1, 1, 1],
@@ -24,6 +25,7 @@ STRUCTURE_8 = np.array([[1, 1, 1],
 class NerveImage:
     def __init__(self, image: np.ndarray, binary_image: np.ndarray, skeleton_image: np.ndarray):
         self.image = image.copy()
+        self.image_standard = histogram_standardization(self.image)
 
         self.binary = binary_image
         self.skeleton = skeleton_image
@@ -87,10 +89,11 @@ class NerveImage:
     def assign_weights(self):
         """ Assign the width weight for each edge """
         # gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        conv_result = get_conv2d(self.image, get_gaussian_kernel())
+        conv_result = get_conv2d(self.image_standard, get_gaussian_kernel())
         conv_result[self.skeleton == 0] = 0
-        normalized_result = get_normalized(conv_result)
-        self.weighted_skeleton = normalized_result
+        # normalized_result = get_normalized(conv_result)
+        # self.weighted_skeleton = normalized_result
+        self.weighted_skeleton = conv_result
 
         for _, edge in self.edges.items():
             for x, y in edge.coords:

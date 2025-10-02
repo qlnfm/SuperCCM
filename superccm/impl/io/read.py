@@ -1,5 +1,3 @@
-from .base import BaseModule
-
 import numpy as np
 import cv2
 from PIL import Image
@@ -14,7 +12,7 @@ _flags = {
 CCM_IMAGE_SHAPE = (384, 384)
 
 
-def _read_image(
+def read_image(
         any_input: str | Path | np.ndarray | bytes | Image.Image,
         image_type: Literal["gray", "color"] = "gray",
 ) -> np.ndarray:
@@ -78,20 +76,3 @@ def _read_image(
     img = img[:height, :width]
 
     return img
-
-
-class ReadImageModule(BaseModule):
-    """
-    A module for reading images, supporting multiple input types (file paths, URLs, numpy arrays, PIL images, etc.),
-    and finally returning in the numpy array format of OpenCV.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.name = 'read'
-        self.output_name = 'raw_image'
-
-    def __call__(self, *args, **kwargs) -> np.ndarray:
-        if not args:
-            raise ValueError("An input is required.")
-        return _read_image(*args, **kwargs)

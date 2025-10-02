@@ -1,55 +1,74 @@
-# 🎇SuperCCM 进阶教程
+# 🎇SuperCCM 简明教程
 
-## 读取图片
-在最初的快速开始中，我们了解到了:
+## 前言
+SuperCCM提供了两种使用方式，**函数式**和**面向对象**。
+
+面向对象的:
 ```python
-from superccm import SuperCCM
+from superccm import DefaultWorkFlow
 
-ccm = SuperCCM()
-metrics = ccm.run('your/img/path')
+wf = DefaultWorkFlow()
+metrics = wf.run('your/img/path')
 print(metrics)
 ```
-事实上，`SuperCCM.run`可以接受更多输入的格式，例如:
+函数式:
+```python
+from superccm.api import analysis
+
+metrics = analysis('your/img/path')
+print(metrics)
+```
+
+## 读取图片
+`SuperCCM.run`可以接受多种输入的格式，例如:
+ - local path
+```python
+from superccm import DefaultWorkFlow
+
+wf = DefaultWorkFlow()
+metrics = wf.run('your/img/path')
+print(metrics)
+```
  - np.ndarray
 ```python
-from superccm import SuperCCM
+from superccm import DefaultWorkFlow
 import cv2
 
 img = cv2.imread('your/img/path', 0)
-ccm = SuperCCM()
-metrics = ccm.run(img)
+wf = DefaultWorkFlow()
+metrics = wf.run(img)
 print(metrics)
 ```
  - PIL.Image
 ```python
-from superccm import SuperCCM
+from superccm import DefaultWorkFlow
 from PIL import Image
 
 img = Image.open('your/img/path')
-ccm = SuperCCM()
-metrics = ccm.run(img)
+wf = DefaultWorkFlow()
+metrics = wf.run(img)
 print(metrics)
 ```
  - URL
 ```python
-from superccm import SuperCCM
+from superccm import DefaultWorkFlow
 
 img_url = 'https://www.yourimgurl.com/your/img/url'
-ccm = SuperCCM()
-metrics = ccm.run(img_url)
+wf = DefaultWorkFlow()
+metrics = wf.run(img_url)
 print(metrics)
 ```
 
 ## 结果可视化
 SuperCCM提供了将结果可视化的方法`draw`
 ```python
-from superccm import SuperCCM, draw
+from superccm import DefaultWorkFlow, draw
 
-superccm = SuperCCM()
+wf = DefaultWorkFlow()
 file_path = 'your/img/path'
-rst = superccm.run(file_path)
+rst = wf.run(file_path)
 print(rst)
-image = draw(superccm.graph)
+image = draw(wf.graph)
 image
 ```
 `draw`方法的参数为:

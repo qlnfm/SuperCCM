@@ -1,11 +1,11 @@
 import cv2
 
-from .modules.topology.graph import NerveGraph
-from .modules.common import get_canvas
+from ..impl.topology.graph import NerveGraph
+from ..impl.common import get_canvas
 
 from typing import Literal
 
-BACKGROUND_TYPE = Literal['empty', 'image']
+BACKGROUND_TYPE = Literal['empty', 'image', 'standard']
 
 
 def draw(
@@ -48,6 +48,9 @@ def draw(
             canvas = get_canvas(3)
         case 'image':
             canvas = nerve_image.image.copy()
+            canvas = cv2.cvtColor(canvas, cv2.COLOR_GRAY2BGR)
+        case 'standard':
+            canvas = nerve_image.image_standard.copy()
             canvas = cv2.cvtColor(canvas, cv2.COLOR_GRAY2BGR)
         case _:
             raise TypeError

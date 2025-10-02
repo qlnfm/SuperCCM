@@ -2,8 +2,7 @@ import math
 import cv2
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
-from typing import List, Tuple, Optional, Set, Literal
+from typing import List, Tuple, Optional, Set
 from collections import Counter
 
 from .morphology import NerveImage
@@ -18,7 +17,7 @@ EDGES_ANGLE_THRESHOLD = 60.0
 # The minimum length of the main nerve fibers
 MIN_MAIN_NERVE_LENGTH = 300
 # The minimum width of the main nerve fibers
-MIN_MAIN_NERVE_WIDTH = 6000
+MIN_MAIN_NERVE_WIDTH = 1000
 # The minimum length of the branches emanating from the main nerve fibers
 MIN_PRIMARY_BRANCH_LENGTH = 3
 
