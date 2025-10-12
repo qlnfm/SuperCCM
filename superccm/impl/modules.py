@@ -1,10 +1,10 @@
-from ..core import Module
+from superccm.core import Module
 
-from .io.read import read_image
-from .segment.segment import CornealNerveSegmenter
-from .skeleton.skeletonize import get_skeleton
-from .topology.graphify import graphify
-from .metircs.metrics import get_metrics
+from superccm.impl.io.read import read_image
+from superccm.impl.segment.segment import CornealNerveSegmenter
+from superccm.impl.skeleton.skeletonize import get_skeleton
+from superccm.impl.graph.graphify import graphify
+from superccm.impl.metircs.metrics import get_metrics
 
 
 class ReadModule(Module):

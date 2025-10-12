@@ -1,13 +1,15 @@
 import networkx as nx
 import numpy as np
 import cv2
+from scipy.ndimage import binary_dilation
 
-from ..topology.graph import NerveGraph
-from ..topology.morphology import NerveImage
-from ..common import get_canvas
-from .bfs import find_shortest_path
-from .tc import get_tc
-from .fracdim import fractal_dimension
+from superccm.impl.utils.tools import get_canvas, get_split_label
+from superccm.impl.metircs.bfs import find_shortest_path
+from superccm.impl.metircs.tc import get_tc
+from superccm.impl.metircs.fracdim import fractal_dimension
+from superccm.impl.metircs.extract_trunk import get_trunk_objs, extract_trunk_canvas
+from superccm.impl.metircs.utils import check_connectivity, graph_to_skeleton
+from superccm.impl.metircs.reconstruction_binary import reconstruct_binary
 
 from typing import Literal, Sequence
 
@@ -31,119 +33,33 @@ length_per_pix = VIEW_DIAMETER_MM / SHAPE[0]  # mm_per_pix
 area_per_pix = (VIEW_DIAMETER_MM ** 2) / (SHAPE[0] * SHAPE[1])  # mm2_per_pix
 
 
-class MainNerveSkeleton:
-    def __init__(self, edges, nodes, end_nodes):
-        self.edges = edges.copy()
-        self.nodes = nodes.copy()
-        self.end_nodes = end_nodes
-
-        self.bone = None
-        self.body = None
-        self.process()
-
-    def process(self):
-        canvas = get_canvas()
-        for edge in self.edges:
-            canvas[edge.bone > 0] = 255
-        for node in self.nodes:
-            canvas[node.bone > 0] = 255
-
-        coords = find_shortest_path(canvas, *tuple(tuple(int(x) for x in n.centroid) for n in self.end_nodes))
-        canvas = get_canvas()
-        for x, y in coords:
-            canvas[y, x] = 255
-
-        self.bone = canvas
 
 
-def get_main_nerves(n_image: NerveImage, n_graph: NerveGraph) -> list[MainNerveSkeleton]:
-    """ Generate the main nerve fiber objects """
-    G = n_graph.graph.copy()
 
-    edges_to_remove = [
-        (u, v, k)
-        for u, v, k, d in G.edges(keys=True, data=True)
-        if d['obj'].edge_type != 'main'
-    ]
-    G.remove_edges_from(edges_to_remove)
-    isolated_nodes = list(nx.isolates(G))
-    G.remove_nodes_from(isolated_nodes)
-
-    connected_subgraphs = [
-        G.subgraph(c).copy()
-        for c in nx.connected_components(nx.Graph(G))
-    ]
-
-    main_nerves = []
-    for subgraph in connected_subgraphs:
-        nodes = [data['obj'] for _, data in subgraph.nodes(data=True)]
-        edges = [data['obj'] for _, _, _, data in subgraph.edges(keys=True, data=True)]
-        end_nodes = [data['obj']
-                     for n, data in subgraph.nodes(data=True)
-                     if len([i for i in subgraph.neighbors(n) if i != n]) == 1]
-        main_nerve = MainNerveSkeleton(edges, nodes, end_nodes)
-        main_nerves.append(main_nerve)
-
-    return main_nerves
-
-
-def get_primary_branch_count(n_image: NerveImage, n_graph: NerveGraph):
-    """ Get the count of the primary nerve fiber branches """
-    G = n_graph.graph.copy()
-
-    result = set()
-
-    for node in G.nodes:
-        edges = G.edges(node, keys=True, data=True)
-        main_count = len(tuple((u, v, k) for u, v, k, d in edges if d['obj'].edge_type == 'main'))
-
-        if main_count == 2:
-            for u, v, k, d in edges:
-                u, v = max(u, v), min(u, v)
-                if d['obj'].edge_type != 'main':
-                    result.add((u, v, k))
-
-    primary_branch_count = len(result)
-    return primary_branch_count
-
-
-def get_total_length(n_image: NerveImage, n_graph: NerveGraph):
-    """ Get the total length of all nerve fibers """
+def cal_total_length(graph: nx.MultiGraph) -> float:
+    """ 总长度 = edge总长度 + node总长度 + node与edge连接处长度 """
     total_length = 0
-    for edge in n_image.edges.values():
-        total_length += edge.length
-    for node in n_image.nodes.values():
-        total_length += node.length
+    for u, v, k, data in graph.edges(keys=True, data=True):
+        obj = data['obj']
+        total_length += obj.length
+
+    for idx, data in graph.nodes(data=True):
+        node_obj = data['obj']
+        total_length += node_obj.length
+
+        edges = graph.edges(idx, keys=True, data=True)
+        for u, v, k, d in edges:
+            edge_obj = d['obj']
+            connectivity = check_connectivity(node_obj.canvas, edge_obj.canvas)
+            if connectivity == '8-connected':
+                total_length += 1
+            elif connectivity == '4-connected':
+                total_length += np.sqrt(2)
+
     return total_length
 
 
-def get_total_area(n_image: NerveImage, n_graph: NerveGraph):
-    """ Get the total area of all nerve fibers """
-    total_area = cv2.countNonZero(n_image.binary)
-    return total_area
-
-
-def get_branch_node_count(n_image: NerveImage, n_graph: NerveGraph):
-    """ Get the count of all branch points """
-    branch_node_count = len(tuple(n for n in n_graph.graph.nodes if n_graph.graph.degree(n) >= 3))
-    return branch_node_count
-
-
-def get_tortuosity_coefficient(main_nerves: Sequence[MainNerveSkeleton]):
-    """ Get the average curvature coefficients of all major nerves """
-    total_tc = sum(get_tc(mn.bone) for mn in main_nerves)
-    return total_tc / len(main_nerves)
-
-
-def get_fractal_dimension(n_image: NerveImage, n_graph: NerveGraph):
-    """ Get the fractal dimension """
-    fracdim = fractal_dimension(n_image.binary)
-    return fracdim
-
-
-def get_metrics(n_graph: NerveGraph, digit=3) -> dict[str, float]:
-    n_image = n_graph.nerve_image
-    main_nerves = get_main_nerves(n_image, n_graph)
+def get_metrics(graph: nx.MultiGraph, binary_image: np.ndarray, decimal=3) -> dict[str, float]:
     metrics = {
         'CNFL': None,  # mm/mm2
         'CNFD': None,  # n/mm2
@@ -154,55 +70,51 @@ def get_metrics(n_graph: NerveGraph, digit=3) -> dict[str, float]:
         'CNFT': None,
         'CNFrD': None,
     }
-
+    total_length = cal_total_length(graph)
+    trunks = get_trunk_objs(graph)
+    skeleton = graph_to_skeleton(graph)
+    binary = reconstruct_binary(binary_image, skeleton)
     # CNFL
-    x = get_total_length(n_image, n_graph)
-    length = x * length_per_pix
-    CNFL = np.round(length / view_area, digit)
+    length = total_length * length_per_pix
+    CNFL = np.round(length / view_area, decimal)
     metrics['CNFL'] = CNFL
 
     # CNFD
-    x = len(main_nerves)
-    CNFD = np.round(x / view_area, digit)
+    x = len(trunks)
+    CNFD = np.round(x / view_area, decimal)
     metrics['CNFD'] = CNFD
 
     # CNBD
-    x = get_primary_branch_count(n_image, n_graph)
-    CNBD = np.round(x / view_area, digit)
+    x = sum([n.type == 'Branch' for trunk in trunks for n in trunk['node_objs']])
+    CNBD = np.round(x / view_area, decimal)
     metrics['CNBD'] = CNBD
 
     # CNFA
-    x = get_total_area(n_image, n_graph)
+    x = cv2.countNonZero(binary)
     area = x * area_per_pix
-    CNFA = np.round(area / view_area, digit)
+    CNFA = np.round(area / view_area, decimal)
     metrics['CNFA'] = CNFA
 
     # CNFW
-    area = get_total_area(n_image, n_graph) * area_per_pix
-    length = get_total_length(n_image, n_graph) * length_per_pix
     width = area / length
-    CNFW = np.round(width / view_area, digit)
+    CNFW = np.round(width / view_area, decimal)
     metrics['CNFW'] = CNFW
 
     # CTBD
-    x = get_branch_node_count(n_image, n_graph)
-    CTBD = np.round(x / view_area, digit)
+    x = sum([data['obj'].type == 'Branch' for _, data in graph.nodes(data=True)])
+    CTBD = np.round(x / view_area, decimal)
     metrics['CTBD'] = CTBD
 
     # CNFrD
-    x = get_fractal_dimension(n_image, n_graph)
-    CFracDim = np.round(x, digit)
+    x = fractal_dimension(binary)
+    CFracDim = np.round(x, decimal)
     metrics['CNFrD'] = CFracDim
 
     # CNFT
-    x = get_tortuosity_coefficient(main_nerves) if len(main_nerves) else 0
-    TC = np.round(x, digit)
+    trunk_canvas = extract_trunk_canvas(graph)
+    trunk_labels = get_split_label(trunk_canvas)
+    x = sum(get_tc(label) for label in trunk_labels) / len(trunk_labels)
+    TC = np.round(x, decimal)
     metrics['CNFT'] = TC
 
     return metrics
-
-
-
-
-
-

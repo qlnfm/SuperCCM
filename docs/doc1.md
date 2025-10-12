@@ -1,33 +1,39 @@
-# 🎇 SuperCCM Quick Tutorial
+# 🎇SuperCCM Quick Tutorial
 
-## Preface
+## Introduction
 
-SuperCCM provides two ways of usage: **functional** and **object-oriented**.
+SuperCCM provides two usage styles: **functional** and **object-oriented**.
 
-Object-oriented:
+### Object-Oriented:
 
 ```python
 from superccm import DefaultWorkFlow
+from superccm.api import vis_ACCM, show_image
 
 wf = DefaultWorkFlow()
-metrics = wf.run('your/img/path')
+metrics = wf.run('test.jpg')
 print(metrics)
+vis_img = vis_ACCM(wf.graph, wf.image)
+show_image(vis_img)
 ```
 
-Functional:
+### Functional:
 
 ```python
-from superccm.api import analysis
+from superccm.api import analysis, analysis_and_vis, show_image
 
-metrics = analysis('your/img/path')
+metrics = analysis('test.jpg')
 print(metrics)
+# Visualization
+metrics, vis_img = analysis_and_vis('test.jpg')
+show_image(vis_img)
 ```
 
 ## Reading Images
 
-`SuperCCM.run` accepts multiple input formats, for example:
+`SuperCCM.run` accepts multiple input formats, such as:
 
-* **Local path**
+* **Local Path**
 
 ```python
 from superccm import DefaultWorkFlow
@@ -71,60 +77,3 @@ wf = DefaultWorkFlow()
 metrics = wf.run(img_url)
 print(metrics)
 ```
-
-## Result Visualization
-
-SuperCCM provides a visualization method `draw`:
-
-```python
-from superccm import DefaultWorkFlow, draw
-
-wf = DefaultWorkFlow()
-file_path = 'your/img/path'
-rst = wf.run(file_path)
-print(rst)
-image = draw(wf.graph)
-image
-```
-
-Parameters of the `draw` method:
-
-```text
-    :param nerve_graph: NerveGraph object
-    :param main_edge_color: Color of main nerve fibers
-    :param side_edge_color: Color of side nerve fibers
-    :param edge_body: Whether to display the full nerve fibers or just their skeleton
-    :param show_main_edge: Whether to display main nerve fibers
-    :param show_side_edge: Whether to display side nerve fibers
-    :param end_node_color: Color of terminal nodes
-    :param branch_node_color: Color of branching nodes
-    :param show_end_node: Whether to display terminal nodes
-    :param show_branch_node: Whether to display branching nodes
-    :param background: For image background, choose 'Image' to use the original image,
-                       or 'empty' for a pure black background
-    :param branch_node_size: Radius of branch nodes (in pixels)
-    :param end_node_size: Radius of terminal nodes (in pixels)
-```
-
-## Running the Web Application
-
-1. Start the web service:
-
-```shell
-python app.py
-```
-
-Output:
-
-```text
-* Running on local URL:  http://127.0.0.1:7860
-```
-
-2. Access the URL in your browser:
-
-<img src="assets/web/app.png">  
-
-3. Upload an image:
-
-<img src="assets/web/app_2.png">  
-

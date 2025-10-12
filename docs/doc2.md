@@ -10,13 +10,13 @@ By default, the module list is defined in:
 `superccm/impl/modules.py`
 
 ```python
-from ..core import Module
+from superccm.core import Module
 
-from .io.read import read_image
-from .segment.segment import CornealNerveSegmenter
-from .skeleton.skeletonize import get_skeleton
-from .topology.graphify import graphify
-from .metircs.metrics import get_metrics
+from superccm.impl.io.read import read_image
+from superccm.impl.segment.segment import CornealNerveSegmenter
+from superccm.impl.skeleton.skeletonize import get_skeleton
+from superccm.impl.graph.graphify import graphify
+from superccm.impl.metircs.metrics import get_metrics
 
 
 class ReadModule(Module):
@@ -61,16 +61,16 @@ The default workflow is defined in:
 `superccm/default.py`
 
 ```python
-from .core import WorkFlow
-from .impl.modules import (
+from superccm.core import WorkFlow
+from superccm.impl.modules import (
     ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
 )
 
 
 class DefaultWorkFlow(WorkFlow):
-    """ Default Workflow of SuperCCM Ver 0.3.0 """
+    """ Default Workflow of SuperCCM Ver 0.4.0 """
     Author = 'Official'
-    Version = '0.3.0'
+    Version = '0.4.0'
     ReadModule = ReadModule
     SegModule = SegModule
     SkelModule = SkelModule
@@ -83,15 +83,17 @@ class DefaultWorkFlow(WorkFlow):
         self.skel_module = self.SkelModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
+        self.image = None
         self.graph = None
 
-    def run(self, image_input):
-        image = self.read_module(image_input)
+    def run(self, image_or_path):
+        image = self.read_module(image_or_path)
+        self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image, binary, skeleton)
+        graph = self.grfy_module(image, skeleton)
         self.graph = graph
-        metrics = self.meas_module(graph)
+        metrics = self.meas_module(graph, binary)
         return metrics
 ```
 
@@ -114,7 +116,7 @@ print(wf)
 ```
 
 ```text
-<DefaultWorkFlow> Author: [Official] Version = 0.3.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
+<DefaultWorkFlow> Author: [Official] Version = 0.4.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
  - <ReadModule> Author: [default] Version = 0.1.0
  - <SegModule> Author: [default] Version = 0.1.0
  - <SkelModule> Author: [default] Version = 0.1.0

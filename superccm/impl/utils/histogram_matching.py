@@ -3,16 +3,13 @@
 """
 @license: Apache License Version 2.0
 @author: Stefano Di Martino
-Exact histogram matching - Optimized Version by Gemini & Qincheng Qiao
+Exact histogram matching - Optimized Version by Gemini
 """
 
 import numpy as np
 from scipy import ndimage  # 使用 ndimage.convolve 替代 signal.convolve2d，效率更高
-import cv2
 import os
-
-reference_img_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ref.png')
-reference_img = cv2.imread(reference_img_path, 0)
+import cv2
 
 
 class OptimizedExactHistogramMatcher:
@@ -143,6 +140,8 @@ class OptimizedExactHistogramMatcher:
         return output
 
 
+reference_img_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ref.png')
+reference_img = cv2.imread(reference_img_path, 0)
 reference_histogram = OptimizedExactHistogramMatcher.get_histogram(reference_img)
 
 

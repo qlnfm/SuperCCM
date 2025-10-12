@@ -6,7 +6,7 @@
 [English](./README.md) | 简体中文
 </div>
 
-### *SuperCCM Version 0.3.0*
+### *SuperCCM Version 0.4.0*
 
 ## 🚀 简介
 
@@ -27,10 +27,6 @@ pip install -r requirements.txt
 ```shell
 pip install superccm
 ```
-
-## 🌟 在线体验
-
-> https://huggingface.co/spaces/jugking6688/SuperCCM
 
 ## ⚡ 快速开始
 

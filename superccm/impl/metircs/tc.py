@@ -96,8 +96,8 @@ def generate_function_coords(func, x_range, num_points):
     return np.vstack((x, y)).T
 
 
-def get_tc(image):
-    coords = preprocess_and_align_nerve(image)
+def get_tc(skeleton_image):
+    coords = preprocess_and_align_nerve(skeleton_image)
     tc = calculate_tc(coords)
     return tc
 

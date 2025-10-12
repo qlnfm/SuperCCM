@@ -6,17 +6,23 @@ SuperCCM提供了两种使用方式，**函数式**和**面向对象**。
 面向对象的:
 ```python
 from superccm import DefaultWorkFlow
+from superccm.api import vis_ACCM, show_image
 
 wf = DefaultWorkFlow()
-metrics = wf.run('your/img/path')
+metrics = wf.run('test.jpg')
 print(metrics)
+vis_img = vis_ACCM(wf.graph, wf.image)
+show_image(vis_img)
 ```
 函数式:
 ```python
-from superccm.api import analysis
+from superccm.api import analysis, analysis_and_vis, show_image
 
-metrics = analysis('your/img/path')
+metrics = analysis('test.jpg')
 print(metrics)
+# 可视化
+metrics, vis_img = analysis_and_vis('test.jpg')
+show_image(vis_img)
 ```
 
 ## 读取图片
@@ -58,53 +64,3 @@ wf = DefaultWorkFlow()
 metrics = wf.run(img_url)
 print(metrics)
 ```
-
-## 结果可视化
-SuperCCM提供了将结果可视化的方法`draw`
-```python
-from superccm import DefaultWorkFlow, draw
-
-wf = DefaultWorkFlow()
-file_path = 'your/img/path'
-rst = wf.run(file_path)
-print(rst)
-image = draw(wf.graph)
-image
-```
-`draw`方法的参数为:
-```text
-    :param 参数 nerve_graph: NerveGraph 对象
-    :param 参数 main_edge_color: 主神经纤维的颜色
-    :param 参数 side_edge_color: 侧神经纤维的颜色
-    :param 参数 edge_body: 是否显示完整的神经纤维还是仅显示其骨架
-    :param 参数 show_main_edge: 主神经纤维是否显示
-    :param 参数 show_side_edge: 侧神经纤维是否显示
-    :param 参数 end_node_color: 末端节点的颜色
-    :param 参数 branch_node_color: 分支节点的颜色
-    :param 参数 show_end_node: 是否显示末端节点
-    :param 参数 show_branch_node: 是否显示分支节点
-    :param 参数 background: 对于图像背景，选择 'Image' 可以使用原始图像作为背景，
-    选择 'empty' 则使用纯黑色背景
-    :param 参数 branch_node_size: 分支节点大小的半径（以像素为单位）
-    :param 参数 end_node_size: 末端节点大小的半径（以像素为单位）
-```
-
-## 启用Web应用程序
-
-1. 启动web服务
-
-```shell
-python app.py
-```
-Output:
-```text
-* Running on local URL:  http://127.0.0.1:7860
-```
-
-2. 通过浏览器访问url
-
-<img src="assets/web/app_cn.png">
-
-3. 上传一张图片
-
-<img src="assets/web/app_2.png">
