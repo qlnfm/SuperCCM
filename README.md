@@ -3,11 +3,11 @@
 
 <hr>
 
-English | [简体中文](./README_CN.md)
+English | [简体中文](./README_cn.md)
 
 </div>
 
-### *SuperCCM Version 0.4.0*
+### *SuperCCM Version 0.3.0*
 
 ## 🚀 Introduction
 
@@ -15,7 +15,13 @@ English | [简体中文](./README_CN.md)
 By providing a CCM corneal nerve image as input, SuperCCM can automatically process the image and output various clinically relevant morphological parameters.
 SuperCCM also allows fast and easy integration of independent algorithms (e.g., segmentation) into the framework.
 
-### 🏠 Github: [https://github.com/qlnfm/SuperCCM](https://github.com/qlnfm/SuperCCM)
+### 🎆 Github: [https://github.com/qlnfm/SuperCCM](https://github.com/qlnfm/SuperCCM)
+
+## 🔮 Use Online
+
+### 🤗 Hugging Face: [https://huggingface.co/spaces/jugking6688/SuperCCM-Web](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
+
+### 🏠 Our Website: [http://aiccm.fun/](http://aiccm.fun/)
 
 ## ❇️ Environment Setup
 
@@ -48,6 +54,10 @@ from superccm.api import analysis
 
 metrics = analysis('your/img/path')
 print(metrics)
+```
+Or, enable Web service locally:
+```shell
+python app.py
 ```
 
 ## 📖 Documentation & Tutorials
