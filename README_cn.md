@@ -14,7 +14,13 @@
 通过输入一张CCM角膜神经图像，SuperCCM可以全自动的对图像进行处理，并输出各种临床中常用的形态学参数。
 SuperCCM还允许快速、简单地将某个独立算法(例如分割等)集成到框架中。
 
-### 🏠Github: https://github.com/qlnfm/SuperCCM
+### 🎆 Github: [https://github.com/qlnfm/SuperCCM](https://github.com/qlnfm/SuperCCM)
+
+## 🔮 在线使用
+
+### 🤗 Hugging Face: [https://huggingface.co/spaces/jugking6688/SuperCCM-Web](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
+
+### 🏠 我们的网站: [http://aiccm.fun/](http://aiccm.fun/)
 
 ## ❇️ 环境准备
 
@@ -43,6 +49,10 @@ from superccm.api import analysis
 
 metrics = analysis('your/img/path')
 print(metrics)
+```
+或者本地启用Web服务:
+```shell
+python app.py
 ```
 
 ## 📖 文档教程
