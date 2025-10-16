@@ -1,10 +1,8 @@
 import networkx as nx
 import numpy as np
 import cv2
-from scipy.ndimage import binary_dilation
 
 from superccm.impl.utils.tools import get_canvas, get_split_label
-from superccm.impl.metircs.bfs import find_shortest_path
 from superccm.impl.metircs.tc import get_tc
 from superccm.impl.metircs.fracdim import fractal_dimension
 from superccm.impl.metircs.extract_trunk import get_trunk_objs, extract_trunk_canvas
