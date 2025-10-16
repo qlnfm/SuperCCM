@@ -15,6 +15,7 @@ from superccm.core import Module
 from superccm.impl.io.read import read_image
 from superccm.impl.segment.segment import CornealNerveSegmenter
 from superccm.impl.skeleton.skeletonize import get_skeleton
+from superccm.impl.trunk.extract_trunk import extract_trunk
 from superccm.impl.graph.graphify import graphify
 from superccm.impl.metircs.metrics import get_metrics
 
@@ -35,6 +36,12 @@ class SkelModule(Module):
     Author = 'default'
     Version = '0.1.0'
     Function = get_skeleton
+
+
+class TrunkModule(Module):
+    Author = 'default'
+    Version = '0.1.0'
+    Function = extract_trunk
 
 
 class GraphifyModule(Module):
@@ -62,17 +69,18 @@ class MeasureModule(Module):
 ```python
 from superccm.core import WorkFlow
 from superccm.impl.modules import (
-    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+    ReadModule, SegModule, SkelModule, TrunkModule, GraphifyModule, MeasureModule
 )
 
 
 class DefaultWorkFlow(WorkFlow):
-    """ Default Workflow of SuperCCM Ver 0.4.0 """
+    """ Default Workflow of SuperCCM Ver 0.5.0 """
     Author = 'Official'
-    Version = '0.4.0'
+    Version = '0.5.0'
     ReadModule = ReadModule
     SegModule = SegModule
     SkelModule = SkelModule
+    TrunkModule = TrunkModule
     GraphifyModule = GraphifyModule
     MeasureModule = MeasureModule
 
@@ -80,6 +88,7 @@ class DefaultWorkFlow(WorkFlow):
         self.read_module = self.ReadModule()
         self.seg_module = self.SegModule()
         self.skel_module = self.SkelModule()
+        self.trunk_module = self.TrunkModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
         self.image = None
@@ -90,7 +99,8 @@ class DefaultWorkFlow(WorkFlow):
         self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image, skeleton)
+        trunk = self.trunk_module(image, skeleton)
+        graph = self.grfy_module(image, skeleton, trunk)
         self.graph = graph
         metrics = self.meas_module(graph, binary)
         return metrics
@@ -114,10 +124,11 @@ print(wf)
 ```
 
 ```text
-<DefaultWorkFlow> Author: [Official] Version = 0.4.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
+<DefaultWorkFlow> Author: [Official] Version = 0.5.0 Doc: " Default Workflow of SuperCCM Ver 0.5.0 "
  - <ReadModule> Author: [default] Version = 0.1.0
  - <SegModule> Author: [default] Version = 0.1.0
  - <SkelModule> Author: [default] Version = 0.1.0
+ - <TrunkModule> Author: [default] Version = 0.1.0
  - <GraphifyModule> Author: [default] Version = 0.1.0
  - <MeasureModule> Author: [default] Version = 0.1.0
 ```
@@ -180,12 +191,9 @@ DefaultWorkFlow.SegModule = MySegModule
 ```
 此时再打印DefaultWorkFlow:
 ```text
-<DefaultWorkFlow> Author: [Official] Version = 0.3.0 Doc: " Default Workflow of SuperCCM Ver 0.3.0 "
- - <ReadModule> Author: [default] Version = 0.1.0
+...
  - <MySegModule> Author: [You] Version = 1.0.0
- - <SkelModule> Author: [default] Version = 0.1.0
- - <GraphifyModule> Author: [default] Version = 0.1.0
- - <MeasureModule> Author: [default] Version = 0.1.0
+...
 ```
 
 ### 3. 定义新工作流

@@ -5,10 +5,9 @@ from superccm.impl.utils.tools import (
     get_split_label, get_coordinates, get_8_neighbors, get_conv2d,
     get_canvas,
 )
-from superccm.impl.graph.trunk import assign_trunks
-from superccm.impl.graph.preprocess import graphify_preprocess
-from superccm.impl.graph.postprocess import graphify_postprocess
-from superccm.impl.graph.utils import is_near_edge, SHAPE
+from superccm.impl.utils.histogram_matching import histogram_standardization
+from superccm.impl.utils.ccm_vignetting import vignetting_correction
+from superccm.impl.utils.estimate_width import estimate_width
 
 from typing import Literal
 
@@ -123,36 +122,21 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
     return g
 
 
-def filter_graph(graph: nx.MultiGraph, intensity_thresh=0.4):
-    graph_: nx.MultiGraph = graph.copy()
-    connected_comps = list(nx.connected_components(graph))
-
-    for comp in connected_comps:
-        subgraph: nx.MultiGraph = graph_.subgraph(comp).copy()
-        intensity = []
-        for u, v, k, data in subgraph.edges(keys=True, data=True):
-            obj = data['obj']
-            intensity.append(obj.intensity_median)
-        all_ep_not_near = not any(
-            is_near_edge(*data['obj'].centroid, SHAPE, 38) for _, data in subgraph.nodes(data=True))
-
-        if (max(intensity) < intensity_thresh) and all_ep_not_near:
-            graph_.remove_nodes_from(comp)
-
-    return graph_
-
-
-def graphify(image: np.ndarray, skeleton: np.ndarray) -> nx.MultiGraph:
-    # 预处理
-    skeleton, intensity_map = graphify_preprocess(skeleton, image)
+def graphify(
+        image: np.ndarray,
+        skeleton: np.ndarray,
+        trunk_canvas: np.ndarray | None = None
+) -> nx.MultiGraph:
     graph = skeleton_to_graph(skeleton)
     # 赋值强度
+    image_std = histogram_standardization(image)
+    image_vig = vignetting_correction(image_std)
+    intensity_map = estimate_width(image_vig, skeleton)
     for _, _, _, data in graph.edges(keys=True, data=True):
-        data['obj'].cal_intensity(intensity_map)
-    # 过滤
-    graph = filter_graph(graph)
-    # 分配主干
-    graph = assign_trunks(graph)
-    # 后处理
-    graph = graphify_postprocess(graph)
+        edge_obj = data['obj']
+        edge_obj.cal_intensity(intensity_map)
+        # 分配主干
+        if trunk_canvas is not None and np.any(cv2.bitwise_and(edge_obj.canvas, trunk_canvas)):
+            edge_obj.is_trunk = True
+
     return graph

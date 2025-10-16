@@ -6,7 +6,7 @@
 [English](./README.md) | 简体中文
 </div>
 
-### *SuperCCM Version 0.4.0*
+### *SuperCCM Version 0.5.0*
 
 ## 🚀 简介
 

@@ -7,6 +7,23 @@ from skimage.morphology import skeletonize
 from typing import Union, Sequence
 
 
+def save_image(image, path='result.png'):
+    """ 保存一张图片 """
+    extend = '.' + path.split('.')[-1]
+    retval, buffer = cv2.imencode(extend, image.astype('uint8'))
+    with open(path, 'wb') as f:
+        f.write(buffer)
+
+
+def show_image(image):
+    """ 展示一张图片 """
+    image_show = image.copy().astype('uint8')
+    if np.amax(image_show) == 1:
+        image_show = image_show * 255
+    cv2.imshow('Show', image_show)
+    cv2.waitKey(0)
+
+
 def get_canvas(channels=1, hw: tuple[int, int] = (384, 384)):
     """ 获取一张空画布图像 """
     if channels > 1:
@@ -118,3 +135,12 @@ def is_4_connected(points):
 
     # 判断是否所有点都访问到
     return len(visited) == len(point_set)
+
+
+def cal_length(canvas: np.ndarray) -> float:
+    """ 计算曲线像素长度 """
+    length = 0
+    contours, _ = cv2.findContours(canvas, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:
+        length += cv2.arcLength(c, True) / 2
+    return length

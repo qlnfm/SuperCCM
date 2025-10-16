@@ -33,9 +33,6 @@ length_per_pix = VIEW_DIAMETER_MM / SHAPE[0]  # mm_per_pix
 area_per_pix = (VIEW_DIAMETER_MM ** 2) / (SHAPE[0] * SHAPE[1])  # mm2_per_pix
 
 
-
-
-
 def cal_total_length(graph: nx.MultiGraph) -> float:
     """ 总长度 = edge总长度 + node总长度 + node与edge连接处长度 """
     total_length = 0
@@ -113,7 +110,10 @@ def get_metrics(graph: nx.MultiGraph, binary_image: np.ndarray, decimal=3) -> di
     # CNFT
     trunk_canvas = extract_trunk_canvas(graph)
     trunk_labels = get_split_label(trunk_canvas)
-    x = sum(get_tc(label) for label in trunk_labels) / len(trunk_labels)
+    if len(trunk_labels):
+        x = sum(get_tc(label) for label in trunk_labels) / len(trunk_labels)
+    else:
+        x = None
     TC = np.round(x, decimal)
     metrics['CNFT'] = TC
 
