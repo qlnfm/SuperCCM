@@ -5,9 +5,9 @@ from superccm.impl.modules import (
 
 
 class DefaultWorkFlow(WorkFlow):
-    """ Default Workflow of SuperCCM Ver 0.5.0 """
+    """ Default Workflow of SuperCCM for HRT III-RCM Corneal confocal microscopy image"""
     Author = 'Official'
-    Version = '0.5.0'
+    Version = '1.0.0'
     ReadModule = ReadModule
     SegModule = SegModule
     SkelModule = SkelModule
@@ -30,8 +30,8 @@ class DefaultWorkFlow(WorkFlow):
         self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        trunk = self.trunk_module(image, skeleton)
-        graph = self.grfy_module(image, skeleton, trunk)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph, binary)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics

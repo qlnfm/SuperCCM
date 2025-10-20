@@ -3,42 +3,42 @@ from superccm.core import Module
 from superccm.impl.io.read import read_image
 from superccm.impl.segment.segment import CornealNerveSegmenter
 from superccm.impl.skeleton.skeletonize import get_skeleton
-from superccm.impl.trunk.extract_trunk import extract_trunk
+from superccm.impl.trunk.extract_trunks import extract_trunks
 from superccm.impl.graph.graphify import graphify
 from superccm.impl.metircs.metrics import get_metrics
 
 
 class ReadModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = read_image
 
 
 class SegModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = CornealNerveSegmenter
 
 
 class SkelModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_skeleton
 
 
 class TrunkModule(Module):
     Author = 'default'
-    Version = '0.1.0'
-    Function = extract_trunk
+    Version = '1.0.0'
+    Function = extract_trunks
 
 
 class GraphifyModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = graphify
 
 
 class MeasureModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_metrics

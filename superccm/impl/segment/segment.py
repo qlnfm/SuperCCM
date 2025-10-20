@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import os
 
+CCM_IMAGE_SHAPE = (384, 384)
+
 
 class CornealNerveSegmenter:
     onnx_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ccm.onnx')
@@ -21,7 +23,7 @@ class CornealNerveSegmenter:
         input_name = self.ort_session.get_inputs()[0].name
         output_name = self.ort_session.get_outputs()[0].name
 
-        image_resized = cv2.resize(image, (384, 384))
+        image_resized = cv2.resize(image, CCM_IMAGE_SHAPE)
 
         input_tensor = image_resized.astype(np.float32) / 255.0
         input_tensor = np.expand_dims(input_tensor, axis=0)  # 添加批次维度

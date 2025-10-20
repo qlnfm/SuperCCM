@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from .module import Module
 import inspect
 
+
 class WorkFlow(ABC):
     """ WorkFlow Interface """
     Author: str
@@ -26,4 +27,3 @@ class WorkFlow(ABC):
         for module in modules:
             desc += f'\n - {module.desc()}'
         return desc
-

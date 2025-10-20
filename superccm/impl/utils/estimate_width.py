@@ -15,6 +15,8 @@ def get_conv2d(image, kernel):
 
 
 def estimate_width(image, skeleton):
-    conv_result = get_conv2d(image, get_gaussian_kernel())
+    conv_result = get_conv2d(image, get_gaussian_kernel(ksize=5))
     conv_result[skeleton == 0] = 0
+    # result = image.copy()
+    # result[skeleton == 0] = 0
     return conv_result

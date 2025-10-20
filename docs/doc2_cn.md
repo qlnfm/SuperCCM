@@ -15,45 +15,46 @@ from superccm.core import Module
 from superccm.impl.io.read import read_image
 from superccm.impl.segment.segment import CornealNerveSegmenter
 from superccm.impl.skeleton.skeletonize import get_skeleton
-from superccm.impl.trunk.extract_trunk import extract_trunk
+from superccm.impl.trunk.extract_trunks import extract_trunks
 from superccm.impl.graph.graphify import graphify
 from superccm.impl.metircs.metrics import get_metrics
 
 
 class ReadModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = read_image
 
 
 class SegModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = CornealNerveSegmenter
 
 
 class SkelModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_skeleton
 
 
 class TrunkModule(Module):
     Author = 'default'
-    Version = '0.1.0'
-    Function = extract_trunk
+    Version = '1.0.0'
+    Function = extract_trunks
 
 
 class GraphifyModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = graphify
 
 
 class MeasureModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_metrics
+
 ```
 
 每个特定的模块继承自`Module`类，Author和Version定义了作者和版本号的信息。
@@ -74,9 +75,9 @@ from superccm.impl.modules import (
 
 
 class DefaultWorkFlow(WorkFlow):
-    """ Default Workflow of SuperCCM Ver 0.5.0 """
+    """ Default Workflow of SuperCCM for HRT III-RCM Corneal confocal microscopy image"""
     Author = 'Official'
-    Version = '0.5.0'
+    Version = '1.0.0'
     ReadModule = ReadModule
     SegModule = SegModule
     SkelModule = SkelModule
@@ -99,11 +100,12 @@ class DefaultWorkFlow(WorkFlow):
         self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        trunk = self.trunk_module(image, skeleton)
-        graph = self.grfy_module(image, skeleton, trunk)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph, binary)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
+
 ```
 
 同样的，在类属性处定义了Author和Version。
@@ -124,13 +126,13 @@ print(wf)
 ```
 
 ```text
-<DefaultWorkFlow> Author: [Official] Version = 0.5.0 Doc: " Default Workflow of SuperCCM Ver 0.5.0 "
- - <ReadModule> Author: [default] Version = 0.1.0
- - <SegModule> Author: [default] Version = 0.1.0
- - <SkelModule> Author: [default] Version = 0.1.0
- - <TrunkModule> Author: [default] Version = 0.1.0
- - <GraphifyModule> Author: [default] Version = 0.1.0
- - <MeasureModule> Author: [default] Version = 0.1.0
+<DefaultWorkFlow> Author: [Official] Version = 1.0.0 Doc: " Default Workflow of SuperCCM for HRT III-RCM Corneal confocal microscopy image"
+ - <ReadModule> Author: [default] Version = 1.0.0
+ - <SegModule> Author: [default] Version = 1.0.0
+ - <SkelModule> Author: [default] Version = 1.0.0
+ - <TrunkModule> Author: [default] Version = 1.0.0
+ - <GraphifyModule> Author: [default] Version = 1.0.0
+ - <MeasureModule> Author: [default] Version = 1.0.0
 ```
 
 ## 例子1: 改进二值化方法
@@ -200,18 +202,21 @@ DefaultWorkFlow.SegModule = MySegModule
 
 继承WorkFlow抽象类。
 ```python
-from superccm import WorkFlow
-from .impl.modules import (
-    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+from superccm.core import WorkFlow
+from superccm.impl.modules import (
+    ReadModule, SkelModule, TrunkModule, GraphifyModule, MeasureModule
 )
+from yourscript import MySegModule
+
 
 class MyWorkFlow(WorkFlow):
     """ This is my workflow :) """
     Author = 'Me'
     Version = '999.999.999'
     ReadModule = ReadModule
-    SegModule = MySegModule
+    SegModule = MySegModule  # 此处挂载了你的新模块
     SkelModule = SkelModule
+    TrunkModule = TrunkModule
     GraphifyModule = GraphifyModule
     MeasureModule = MeasureModule
 
@@ -219,17 +224,21 @@ class MyWorkFlow(WorkFlow):
         self.read_module = self.ReadModule()
         self.seg_module = self.SegModule()
         self.skel_module = self.SkelModule()
+        self.trunk_module = self.TrunkModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
+        self.image = None
         self.graph = None
 
-    def run(self, image_input):
-        image = self.read_module(image_input)
+    def run(self, image_or_path):
+        image = self.read_module(image_or_path)
+        self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image, binary, skeleton)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
 ```
 
@@ -260,11 +269,13 @@ class MyPrepModule(Module):
 
 定义工作流:
 ```python
-from superccm import WorkFlow
-from .impl.modules import (
-    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+from superccm.core import WorkFlow
+from superccm.impl.modules import (
+    ReadModule, SegModule, SkelModule, TrunkModule, GraphifyModule, MeasureModule
 )
+
 from yourscript import MyPrepModule
+
 
 class MyWorkFlow(WorkFlow):
     """ This is my workflow :) """
@@ -274,6 +285,7 @@ class MyWorkFlow(WorkFlow):
     PrepModule = MyPrepModule
     SegModule = SegModule
     SkelModule = SkelModule
+    TrunkModule = TrunkModule
     GraphifyModule = GraphifyModule
     MeasureModule = MeasureModule
 
@@ -282,18 +294,22 @@ class MyWorkFlow(WorkFlow):
         self.prep_module = self.PrepModule()  # Here
         self.seg_module = self.SegModule()
         self.skel_module = self.SkelModule()
+        self.trunk_module = self.TrunkModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
+        self.image = None
         self.graph = None
 
-    def run(self, image_input):
-        image = self.read_module(image_input)
-        image_prep = self.prep_module(image)
-        binary = self.seg_module(image_prep)
+    def run(self, image_or_path):
+        image = self.read_module(image_or_path)
+        self.image = image
+        binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image_prep, binary, skeleton)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
+
 ```
 

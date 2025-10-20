@@ -1,26 +1,3 @@
-"""
-ccm_vignetting.py
-=================
-自动暗角校正算法（适用于角膜共聚焦显微镜图像，CCM）
-
-提供两种方法：
-1. morph_gauss —— 灰度开运算 + 高斯平滑，快速稳健
-2. polyfit —— 在 log 域做低阶多项式拟合，更平滑准确
-
-用法示例：
------------
-from ccm_vignetting import vignetting_correction
-import imageio.v3 as iio
-
-img = iio.imread("your_CCM_image.png")  # 灰度或RGB图像
-corrected, background = vignetting_correction(img, method="polyfit")
-
-iio.imwrite("corrected.png", corrected)
-
-依赖:
-    numpy, scipy, scikit-image
-"""
-
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import exposure, color

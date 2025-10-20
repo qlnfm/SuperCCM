@@ -1,43 +1,74 @@
 <div align="center">
-  <img src="docs/assets/superccm.png" alt="description" />
 
-<hr>
+<img src="docs/assets/superccm.png" alt="SuperCCM Logo" width="500"/>
 
-English | [简体中文](./README_cn.md)
+---
+
+# ✨ SuperCCM v1.0
+
+**🧠 A Fully Open-Source Framework for Corneal Confocal Microscopy (CCM) Image Analysis**
+
+[![GitHub](https://img.shields.io/badge/GitHub-SuperCCM-blue?logo=github)](https://github.com/qlnfm/SuperCCM)
+[![PyPI](https://img.shields.io/pypi/v/superccm?color=blueviolet&logo=pypi)](https://pypi.org/project/superccm/)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-green.svg)](./LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+
+**English** | [简体中文](./README_CN.md)
 
 </div>
 
-### *SuperCCM Version 0.5*
+---
 
-## 🚀 Introduction
+## 🚀 Overview
 
-✨️SuperCCM is an open-source Python framework for processing and analyzing corneal nerve images from corneal confocal microscopy (CCM).
-By providing a CCM corneal nerve image as input, SuperCCM can automatically process the image and output various clinically relevant morphological parameters.
-SuperCCM also allows fast and easy integration of independent algorithms (e.g., segmentation) into the framework.
+### 💡 What is SuperCCM? Why do we need it?
 
-### 🎆 Github: [https://github.com/qlnfm/SuperCCM](https://github.com/qlnfm/SuperCCM)
+✨ **SuperCCM** is an **open-source Python framework** for analyzing corneal nerve images obtained from  
+**Corneal Confocal Microscopy (CCM)**.  
+Given a single CCM image, SuperCCM can automatically perform preprocessing, segmentation,  
+and compute clinically relevant morphological parameters.
 
-## 🔮 Use Online
+It also provides a **modular architecture**, allowing you to easily integrate your own algorithms  
+(e.g., segmentation, denoising, or custom workflows).
 
-### 🤗 Hugging Face: [https://huggingface.co/spaces/jugking6688/SuperCCM-Web](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
+🧩 **Scientific Motivation**  
+Over the past 20 years, CCM-based corneal nerve morphology has proven to be a reliable biomarker  
+for various **neurodegenerative** (e.g., diabetic neuropathy, Parkinson’s disease)  
+and **ocular surface disorders** (e.g., dry eye).  
+Existing tools like *CCMetrics*, *NeuronJ/ImageJ*, and *ACCMetrics* are either semi-automatic  
+or closed-source.  
+SuperCCM aims to provide a **transparent, efficient, and fully open** alternative for the community.
 
-### 🏠 Our Website: [http://aiccm.fun/](http://aiccm.fun/)
+---
 
-## ❇️ Environment Setup
+## 🔮 Online Demo
 
-```shell
+🎯 **Try it instantly on Hugging Face Spaces:**  
+👉 [Run SuperCCM Web App](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
+
+---
+
+## ❇️ Installation
+
+### 🧱 Option 1: From source
+
+```bash
 conda create -n superccm python=3.10 -y
 conda activate superccm
 pip install -r requirements.txt
-```
+````
 
-* Install from PyPI:
+### 📦 Option 2: From PyPI
 
-```shell
+```bash
 pip install superccm
 ```
 
+---
+
 ## ⚡ Quick Start
+
+### ✅ Using the default workflow
 
 ```python
 from superccm import DefaultWorkFlow
@@ -47,7 +78,7 @@ metrics = wf.run('your/img/path')
 print(metrics)
 ```
 
-Or a simpler, less formal version:
+### 🧩 Shortcut (less formal)
 
 ```python
 from superccm.api import analysis
@@ -55,22 +86,42 @@ from superccm.api import analysis
 metrics = analysis('your/img/path')
 print(metrics)
 ```
-Or, enable Web service locally:
-```shell
+
+### 🌐 Launch the local web app
+
+```bash
 python app.py
 ```
 
-## 📖 Documentation & Tutorials
+---
 
-SuperCCM follows a principle of simplicity, allowing users and developers to get started and master it with minimal cost and time.
+## 📖 Documentation
 
-* ✨️ [Quick Tutorial](docs/doc1.md): Learn how to use SuperCCM in detail
-* ✨️ [Module Development](docs/doc2.md): Learn how to customize workflows and integrate your own algorithms into SuperCCM
+SuperCCM follows a **simple and modular design philosophy**,
+making it easy for both users and developers to get started quickly.
+
+* 📘 [Quick Tutorial](docs/doc1_en.md): Learn how to use SuperCCM step-by-step
+* 🧠 [Module Development Guide](docs/doc2_en.md): Integrate your own algorithms into the framework
+
+---
 
 ## 📄 License
 
-This project is licensed under the [GPL v3](LICENSE) open-source license.
+This project is licensed under the [**GPL v3**](./LICENSE).
+You are free to use, modify, and distribute it under the same terms.
 
-## 🎓 Academic Citation
+---
 
-> coming soon ...
+## 🎓 Academic Reference
+
+> 📢 Coming soon!
+> Our manuscript has been accepted by **TVST** and will be available for citation soon.
+
+---
+
+<div align="center">
+
+🧬 Made with ❤️ by the SuperCCM Team
+💻 [https://github.com/qlnfm/SuperCCM](https://github.com/qlnfm/SuperCCM)
+
+</div>

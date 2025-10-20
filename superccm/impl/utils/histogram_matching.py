@@ -3,11 +3,11 @@
 """
 @license: Apache License Version 2.0
 @author: Stefano Di Martino
-Exact histogram matching - Optimized Version by Gemini
+Exact histogram matching - Optimized Version by Qincheng Qiao and Gemini
 """
 
 import numpy as np
-from scipy import ndimage  # 使用 ndimage.convolve 替代 signal.convolve2d，效率更高
+from scipy import ndimage
 import os
 import cv2
 

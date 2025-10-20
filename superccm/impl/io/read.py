@@ -72,6 +72,7 @@ def read_image(
     if img is None or img.size == 0:
         raise IOError("Decoded image is empty or invalid.")
 
+    # Reset the image to the preset size
     height, width = CCM_IMAGE_SHAPE
     img = img[:height, :width]
 

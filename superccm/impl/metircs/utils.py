@@ -6,30 +6,22 @@ from superccm.impl.utils.tools import get_canvas
 
 def check_connectivity(mask1: np.ndarray, mask2: np.ndarray) -> str:
     """
-    判断两个区域之间的连通性关系：
-    返回值：
-        '8-connected'  -> 两区域8连通（包含4连通情况）
-        '4-connected'  -> 仅4连通（非8连通）
-        'disconnected' -> 不连通
+    Determine the connectivity relationship between two regions:
+    Return value:
+    '8-connected' -> The two regions are 8-connected (including 4-connected cases)
+    '4-connected' -> Only 4-connected (not 8-connected)
+    'disconnected' -> Not connected
     """
-    if mask1.shape != mask2.shape:
-        raise ValueError("mask1 和 mask2 必须形状相同")
-
-    # 转为布尔掩膜
     mask1 = mask1 > 0
     mask2 = mask2 > 0
-    # 8连通结构元素（3x3全1）
     selem_8 = np.ones((3, 3), dtype=bool)
-    # 4连通结构元素（十字形）
     selem_4 = np.array([[0, 1, 0],
                         [1, 1, 1],
                         [0, 1, 0]], dtype=bool)
 
-    # 检查8连通（包括4连通情况）
     if np.any(binary_dilation(mask1, structure=selem_8) & mask2):
         return '8-connected'
 
-    # 检查4连通（排除8连通后）
     elif np.any(binary_dilation(mask1, structure=selem_4) & mask2):
         return '4-connected'
 

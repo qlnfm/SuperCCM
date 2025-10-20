@@ -5,11 +5,11 @@ import cv2
 from superccm.impl.utils.tools import get_canvas, get_split_label
 from superccm.impl.metircs.tc import get_tc
 from superccm.impl.metircs.fracdim import fractal_dimension
-from superccm.impl.metircs.extract_trunk import get_trunk_objs, extract_trunk_canvas
+from superccm.impl.metircs.extract_trunk import get_trunk_objs
 from superccm.impl.metircs.utils import check_connectivity, graph_to_skeleton
 from superccm.impl.metircs.reconstruction_binary import reconstruct_binary
 
-from typing import Literal, Sequence
+from typing import Literal
 
 METRICS = Literal[
     'CNFL',
@@ -23,16 +23,21 @@ METRICS = Literal[
 ]
 
 # Image shape
-SHAPE = (384, 384)
+CCM_IMAGE_SHAPE = (384, 384)
 # Field of view range (mm)
 VIEW_DIAMETER_MM = 0.4
 view_area = VIEW_DIAMETER_MM ** 2  # mm2
-length_per_pix = VIEW_DIAMETER_MM / SHAPE[0]  # mm_per_pix
-area_per_pix = (VIEW_DIAMETER_MM ** 2) / (SHAPE[0] * SHAPE[1])  # mm2_per_pix
+length_per_pix = VIEW_DIAMETER_MM / CCM_IMAGE_SHAPE[0]  # mm_per_pix
+area_per_pix = (VIEW_DIAMETER_MM ** 2) / (CCM_IMAGE_SHAPE[0] * CCM_IMAGE_SHAPE[1])  # mm2_per_pix
 
 
 def cal_total_length(graph: nx.MultiGraph) -> float:
-    """ 总长度 = edge总长度 + node总长度 + node与edge连接处长度 """
+    """
+    Total length =
+    total length of edges +
+    total length of nodes +
+    length at the connection points between nodes and edges
+    """
     total_length = 0
     for u, v, k, data in graph.edges(keys=True, data=True):
         obj = data['obj']
@@ -54,7 +59,7 @@ def cal_total_length(graph: nx.MultiGraph) -> float:
     return total_length
 
 
-def get_metrics(graph: nx.MultiGraph, binary_image: np.ndarray, decimal=3) -> dict[str, float]:
+def get_metrics(graph: nx.MultiGraph, binary_image: np.ndarray, trunk_image: np.ndarray, decimal=3) -> dict[str, float]:
     metrics = {
         'CNFL': None,  # mm/mm2
         'CNFD': None,  # n/mm2
@@ -106,13 +111,13 @@ def get_metrics(graph: nx.MultiGraph, binary_image: np.ndarray, decimal=3) -> di
     metrics['CNFrD'] = CFracDim
 
     # CNFT
-    trunk_canvas = extract_trunk_canvas(graph)
+    trunk_canvas = trunk_image
     trunk_labels = get_split_label(trunk_canvas)
     if len(trunk_labels):
         x = sum(get_tc(label) for label in trunk_labels) / len(trunk_labels)
+        x = np.round(x, decimal)
     else:
         x = None
-    TC = np.round(x, decimal)
-    metrics['CNFT'] = TC
+    metrics['CNFT'] = x
 
     return metrics

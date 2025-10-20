@@ -72,17 +72,17 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
     g = nx.MultiGraph()
     skeleton_cls = get_conv2d(skeleton / 255, CLASSIFY_KERNEL)
 
-    # 转换短连接为点
+    # Convert short links to dots
     canvas_12 = get_canvas(1)
     canvas_12[skeleton_cls == 12] = 255
     for label in get_split_label(canvas_12):
         if cv2.countNonZero(label) <= 2:
             skeleton_cls[label > 0] = 13
 
-    # 创建一个表，以快速查询某个坐标属于哪个Node
+    # Create a table to quickly query which Node a certain coordinate belongs to/创建一个表，以快速查询某个坐标属于哪个Node
     node_coords = {}
 
-    # 添加端点Node
+    # Add endpoint Node
     canvas_eps = get_canvas(1)
     canvas_eps[skeleton_cls == 11] = 255
     for idx, label in enumerate(get_split_label(canvas_eps)):
@@ -92,7 +92,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
         for coord in coords:
             node_coords[coord] = idx
 
-    # 添加分支点Node
+    # Add branching point Node
     canvas_eps = get_canvas(1)
     canvas_eps[skeleton_cls >= 13] = 255
     nodes_num = len(g.nodes)
@@ -103,7 +103,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
         for coord in coords:
             node_coords[coord] = idx + nodes_num
 
-    # 添加边Edge
+    # ADD Edge
     canvas_eps = get_canvas(1)
     canvas_eps[skeleton_cls == 12] = 255
     for idx, label in enumerate(get_split_label(canvas_eps)):
@@ -125,18 +125,14 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
 def graphify(
         image: np.ndarray,
         skeleton: np.ndarray,
-        trunk_canvas: np.ndarray | None = None
 ) -> nx.MultiGraph:
     graph = skeleton_to_graph(skeleton)
-    # 赋值强度
+    # Assignment intensity
     image_std = histogram_standardization(image)
     image_vig = vignetting_correction(image_std)
     intensity_map = estimate_width(image_vig, skeleton)
     for _, _, _, data in graph.edges(keys=True, data=True):
         edge_obj = data['obj']
         edge_obj.cal_intensity(intensity_map)
-        # 分配主干
-        if trunk_canvas is not None and np.any(cv2.bitwise_and(edge_obj.canvas, trunk_canvas)):
-            edge_obj.is_trunk = True
 
     return graph

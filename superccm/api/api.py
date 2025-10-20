@@ -1,6 +1,6 @@
 from superccm.impl.segment import segment
 from superccm.impl.skeleton.skeletonize import get_skeleton
-from superccm.impl.trunk.extract_trunk import extract_trunk
+from superccm.impl.trunk.extract_trunks import extract_trunks
 from superccm.impl.graph.graphify import graphify
 from superccm.impl.graph.vis import vis_ACCM
 from superccm.impl.metircs.metrics import get_metrics
@@ -20,9 +20,9 @@ def analysis(image_or_path) -> dict[str, float]:
     image = read(image_or_path)
     binary = seg(image)
     skeleton = skel(binary)
-    trunks = trunk(image, skeleton)
-    graph = grfy(image, skeleton, trunks)
-    metrics = meas(graph, binary)
+    graph = grfy(image, skeleton)
+    graph, trunks = trunk(graph)
+    metrics = meas(graph, binary, trunks)
     return metrics
 
 
@@ -30,14 +30,11 @@ def analysis_and_vis(image_or_path) -> tuple[dict[str, float], np.ndarray]:
     image = read(image_or_path)
     binary = seg(image)
     skeleton = skel(binary)
-    trunks = trunk(image, skeleton)
-    graph = grfy(image, skeleton, trunks)
-    metrics = meas(graph, binary)
+    graph = grfy(image, skeleton)
+    graph, trunks = trunk(graph)
+    metrics = meas(graph, binary, trunks)
     image_vis = vis_ACCM(graph, image)
     return metrics, image_vis
-
-
-
 
 
 def read(image_or_path, **kwargs) -> np.ndarray:
@@ -56,16 +53,16 @@ def skel(binary: np.ndarray, **kwargs) -> np.ndarray:
     return get_skeleton(binary, **kwargs)
 
 
-def trunk(image: np.ndarray, skeleton: np.ndarray, **kwargs) -> np.ndarray:
-    return extract_trunk(image, skeleton, **kwargs)
+def trunk(graph: nx.MultiGraph) -> tuple[nx.MultiGraph, np.ndarray]:
+    return extract_trunks(graph)
 
 
-def grfy(image: np.ndarray, skeleton_image: np.ndarray, trunk_image: np.ndarray | None = None):
-    return graphify(image, skeleton_image, trunk_image)
+def grfy(image: np.ndarray, skeleton_image: np.ndarray):
+    return graphify(image, skeleton_image)
 
 
-def meas(graph: nx.MultiGraph, binary_image: np.ndarray, decimal=3) -> dict[str, float]:
-    return get_metrics(graph, binary_image, decimal)
+def meas(graph: nx.MultiGraph, binary_image: np.ndarray, trunk_image: np.ndarray, decimal=3) -> dict[str, float]:
+    return get_metrics(graph, binary_image, trunk_image, decimal)
 
 
 def hist_std(image: np.ndarray) -> np.ndarray:

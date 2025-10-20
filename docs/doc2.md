@@ -1,10 +1,10 @@
-# 🎇 SuperCCM Custom Modules & Workflows
+# 🎇 SuperCCM Custom Modules and Workflows
 
-SuperCCM allows you to integrate your own algorithms into its workflows.
+SuperCCM allows you to integrate your own algorithms into its workflow system.
 
 ## Basics: How does SuperCCM work?
 
-SuperCCM executes tasks by integrating each **Module** into a **Workflow**.
+SuperCCM performs tasks by integrating individual modules into a workflow.
 By default, the module list is defined in:
 
 `superccm/impl/modules.py`
@@ -15,53 +15,53 @@ from superccm.core import Module
 from superccm.impl.io.read import read_image
 from superccm.impl.segment.segment import CornealNerveSegmenter
 from superccm.impl.skeleton.skeletonize import get_skeleton
-from superccm.impl.trunk.extract_trunk import extract_trunk
+from superccm.impl.trunk.extract_trunks import extract_trunks
 from superccm.impl.graph.graphify import graphify
 from superccm.impl.metircs.metrics import get_metrics
 
 
 class ReadModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = read_image
 
 
 class SegModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = CornealNerveSegmenter
 
 
 class SkelModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_skeleton
 
 
 class TrunkModule(Module):
     Author = 'default'
-    Version = '0.1.0'
-    Function = extract_trunk
+    Version = '1.0.0'
+    Function = extract_trunks
 
 
 class GraphifyModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = graphify
 
 
 class MeasureModule(Module):
     Author = 'default'
-    Version = '0.1.0'
+    Version = '1.0.0'
     Function = get_metrics
 ```
 
 Each specific module inherits from the `Module` class.
-The `Author` and `Version` class attributes define metadata.
-The `Function` class attribute defines the actual functionality, which accepts two types of inputs:
+The `Author` and `Version` attributes define the author and version information.
+The core functionality is specified in the `Function` attribute, which can take either of the following:
 
-1. A **function** (callable object)
-2. A **class that implements `__call__`** (not an instance)
+1. A callable function
+2. A class implementing the `__call__` method (but not an instance)
 
 The default workflow is defined in:
 
@@ -75,9 +75,9 @@ from superccm.impl.modules import (
 
 
 class DefaultWorkFlow(WorkFlow):
-    """ Default Workflow of SuperCCM Ver 0.5.0 """
+    """ Default Workflow of SuperCCM for HRT III-RCM Corneal confocal microscopy image"""
     Author = 'Official'
-    Version = '0.5.0'
+    Version = '1.0.0'
     ReadModule = ReadModule
     SegModule = SegModule
     SkelModule = SkelModule
@@ -100,23 +100,24 @@ class DefaultWorkFlow(WorkFlow):
         self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        trunk = self.trunk_module(image, skeleton)
-        graph = self.grfy_module(image, skeleton, trunk)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph, binary)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
 ```
 
 Similarly, `Author` and `Version` are defined as class attributes.
-Additional class attributes are used to mount `Module`s.
+Additional class attributes are used to mount the modules.
 
-> Note: The class names of modules and the workflow’s class attributes do not need to match. This is just a convention in the default workflow.
+> Note: The class names of the modules and the attribute names in the workflow do not have to match—this is just an
+> example.
 
-In the `__init__` method, modules are instantiated and additional custom logic can be implemented.
+In the `__init__` method, these modules are instantiated, and any extra logic can be added.
 
-In the `run` method, the specific input/output and execution order of each module are defined.
+The `run` method defines the input-output relationships and execution order of the modules.
 
-If we print the `DefaultWorkFlow`:
+If we try printing the `DefaultWorkFlow`:
 
 ```python
 from superccm import DefaultWorkFlow
@@ -125,35 +126,39 @@ wf = DefaultWorkFlow()
 print(wf)
 ```
 
+Output:
+
 ```text
-<DefaultWorkFlow> Author: [Official] Version = 0.5.0 Doc: " Default Workflow of SuperCCM Ver 0.5.0 "
- - <ReadModule> Author: [default] Version = 0.1.0
- - <SegModule> Author: [default] Version = 0.1.0
- - <SkelModule> Author: [default] Version = 0.1.0
- - <TrunkModule> Author: [default] Version = 0.1.0
- - <GraphifyModule> Author: [default] Version = 0.1.0
- - <MeasureModule> Author: [default] Version = 0.1.0
+<DefaultWorkFlow> Author: [Official] Version = 1.0.0 Doc: " Default Workflow of SuperCCM for HRT III-RCM Corneal confocal microscopy image"
+ - <ReadModule> Author: [default] Version = 1.0.0
+ - <SegModule> Author: [default] Version = 1.0.0
+ - <SkelModule> Author: [default] Version = 1.0.0
+ - <TrunkModule> Author: [default] Version = 1.0.0
+ - <GraphifyModule> Author: [default] Version = 1.0.0
+ - <MeasureModule> Author: [default] Version = 1.0.0
 ```
 
 ---
 
 ## Example 1: Improving the Binarization Method
 
-Suppose you developed a novel CCM image binarization algorithm or model and want to integrate it into SuperCCM.
+Suppose you’ve developed a new binarization algorithm or model for CCM images and want to integrate it into SuperCCM.
 
-You can wrap it as a function:
+You can wrap your algorithm as a function `sota_ccm_segment`:
 
 ```python
 import numpy as np
+
 
 def sota_ccm_segment(image: np.ndarray) -> np.ndarray:
     pass
 ```
 
-Or as a class:
+Or as a class `SotaCcmSegmenter`:
 
 ```python
 import numpy as np
+
 
 class SotaCcmSegmenter:
     def __init__(self):
@@ -163,7 +168,7 @@ class SotaCcmSegmenter:
         pass
 ```
 
-You now have three ways to integrate it into SuperCCM:
+There are three ways to integrate this into SuperCCM:
 
 ### 1. Monkey Patching
 
@@ -178,10 +183,11 @@ rst = wf.run('test.jpg')
 
 ### 2. Define a New Module
 
-And then apply monkey patching.
+Then apply a monkey patch.
 
 ```python
 from superccm import Module, DefaultWorkFlow
+
 
 class MySegModule(Module):
     Author = 'You'
@@ -189,10 +195,11 @@ class MySegModule(Module):
     Function = sota_ccm_segment
     # Function = SotaCcmSegmenter
 
+
 DefaultWorkFlow.SegModule = MySegModule
 ```
 
-Now if we print `DefaultWorkFlow`:
+If you print `DefaultWorkFlow` now:
 
 ```text
 ...
@@ -202,21 +209,24 @@ Now if we print `DefaultWorkFlow`:
 
 ### 3. Define a New Workflow
 
-By inheriting the abstract class `WorkFlow`:
+Inherit from the `WorkFlow` abstract class.
 
 ```python
-from superccm import WorkFlow
-from .impl.modules import (
-    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+from superccm.core import WorkFlow
+from superccm.impl.modules import (
+    ReadModule, SkelModule, TrunkModule, GraphifyModule, MeasureModule
 )
+from yourscript import MySegModule
+
 
 class MyWorkFlow(WorkFlow):
     """ This is my workflow :) """
     Author = 'Me'
     Version = '999.999.999'
     ReadModule = ReadModule
-    SegModule = MySegModule
+    SegModule = MySegModule  # Your new module goes here
     SkelModule = SkelModule
+    TrunkModule = TrunkModule
     GraphifyModule = GraphifyModule
     MeasureModule = MeasureModule
 
@@ -224,17 +234,21 @@ class MyWorkFlow(WorkFlow):
         self.read_module = self.ReadModule()
         self.seg_module = self.SegModule()
         self.skel_module = self.SkelModule()
+        self.trunk_module = self.TrunkModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
+        self.image = None
         self.graph = None
 
-    def run(self, image_input):
-        image = self.read_module(image_input)
+    def run(self, image_or_path):
+        image = self.read_module(image_or_path)
+        self.image = image
         binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image, binary, skeleton)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
 ```
 
@@ -242,12 +256,14 @@ class MyWorkFlow(WorkFlow):
 
 ## Example 2: Adding a Preprocessing Module
 
-Suppose you developed a novel CCM image preprocessing algorithm that improves image quality and enhances subsequent analysis.
+Suppose you’ve developed a new preprocessing algorithm that improves the quality of CCM images and enhances subsequent
+analysis.
 
-You wrap it as a function:
+You wrap your algorithm as a function `ccm_preprocess`:
 
 ```python
 import numpy as np
+
 
 def ccm_preprocess(image: np.ndarray) -> np.ndarray:
     pass
@@ -258,6 +274,7 @@ Define a new module:
 ```python
 from superccm import Module
 
+
 class MyPrepModule(Module):
     Author = 'Who?'
     Version = '1.0.0'
@@ -267,11 +284,13 @@ class MyPrepModule(Module):
 Define a workflow:
 
 ```python
-from superccm import WorkFlow
-from .impl.modules import (
-    ReadModule, SegModule, SkelModule, GraphifyModule, MeasureModule
+from superccm.core import WorkFlow
+from superccm.impl.modules import (
+    ReadModule, SegModule, SkelModule, TrunkModule, GraphifyModule, MeasureModule
 )
+
 from yourscript import MyPrepModule
+
 
 class MyWorkFlow(WorkFlow):
     """ This is my workflow :) """
@@ -281,6 +300,7 @@ class MyWorkFlow(WorkFlow):
     PrepModule = MyPrepModule
     SegModule = SegModule
     SkelModule = SkelModule
+    TrunkModule = TrunkModule
     GraphifyModule = GraphifyModule
     MeasureModule = MeasureModule
 
@@ -289,17 +309,21 @@ class MyWorkFlow(WorkFlow):
         self.prep_module = self.PrepModule()  # Here
         self.seg_module = self.SegModule()
         self.skel_module = self.SkelModule()
+        self.trunk_module = self.TrunkModule()
         self.grfy_module = self.GraphifyModule()
         self.meas_module = self.MeasureModule()
+        self.image = None
         self.graph = None
 
-    def run(self, image_input):
-        image = self.read_module(image_input)
-        image_prep = self.prep_module(image)
-        binary = self.seg_module(image_prep)
+    def run(self, image_or_path):
+        image = self.read_module(image_or_path)
+        self.image = image
+        binary = self.seg_module(image)
         skeleton = self.skel_module(binary)
-        graph = self.grfy_module(image_prep, binary, skeleton)
+        graph = self.grfy_module(image, skeleton)
+        graph, trunks = self.trunk_module(graph)
         self.graph = graph
-        metrics = self.meas_module(graph)
+        metrics = self.meas_module(graph, binary, trunks)
         return metrics
 ```
+
