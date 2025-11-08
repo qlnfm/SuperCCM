@@ -118,11 +118,14 @@ def _prune(skeleton_image, length_thresh=5):
     canvas_mid = superccm.api.get_canvas(1)
     canvas_mid[skeleton_cls >= 13] = 255
     canvas_mid = canvas_mid - canvas_bp
+    h, w = skeleton_.shape
     for coord in get_coordinates(canvas_mid):
         neighbors = get_8_neighbors(*coord)
         # 周围骨架像素全部4连通
-        neighbors = [(x, y) for x, y in neighbors if skeleton_[y, x]]
-        if is_4_connected(neighbors):
+        # 限制在图像范围内
+        valid_neighbors = [(x, y) for x, y in neighbors if 0 <= x < w and 0 <= y < h]
+        valid_neighbors = [(x, y) for x, y in valid_neighbors if skeleton_[y, x]]
+        if is_4_connected(valid_neighbors):
             x, y = coord
             skeleton_[y, x] = 0
 
