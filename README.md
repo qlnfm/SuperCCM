@@ -46,6 +46,11 @@ SuperCCM aims to provide a **transparent, efficient, and fully open** alternativ
 🎯 **Try it instantly on Hugging Face Spaces:**  
 👉 [Run SuperCCM Web App](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
 
+## 💻 Desktop App Download
+
+🚀 **Get the full desktop experience now:**  
+👉 [Download SuperCCM Desktop v1.0](https://github.com/qlnfm/SuperCCM/releases/tag/v1.0)
+
 ---
 
 ## ❇️ Installation
