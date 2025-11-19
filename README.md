@@ -119,8 +119,7 @@ You are free to use, modify, and distribute it under the same terms.
 
 ## 🎓 Academic Reference
 
-> 📢 Coming soon!
-> Our manuscript has been accepted by **TVST** and will be available for citation soon.
+> Qiao, Qincheng et al. “SuperCCM: An Open Source Python Toolkit for Automated Quantification of Corneal Nerve Fibers in Confocal Microscopy Images.” Translational vision science & technology vol. 14,11 (2025): 27. doi:10.1167/tvst.14.11.27
 
 ---
 
