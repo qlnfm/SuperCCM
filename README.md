@@ -105,6 +105,7 @@ python app.py
 SuperCCM follows a **simple and modular design philosophy**,
 making it easy for both users and developers to get started quickly.
 
+* 📀 [Working Principle](docs/doc0_en.md): The working principle of SuperCCM
 * 📘 [Quick Tutorial](docs/doc1_en.md): Learn how to use SuperCCM step-by-step
 * 🧠 [Module Development Guide](docs/doc2_en.md): Integrate your own algorithms into the framework
 

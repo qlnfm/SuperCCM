@@ -40,6 +40,11 @@ SuperCCM 致力于提供一个 **开源、透明、自由且高效** 的新选�
 🎯 **无需安装，立即体验：**  
 👉 [在 Hugging Face 上运行 SuperCCM Web App](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)
 
+## 💻 桌面应用程序下载
+
+🚀 **立即体验完整的桌面功能：**  
+👉 [下载 SuperCCM 桌面版 v1.0](https://github.com/qlnfm/SuperCCM/releases/tag/v1.0)
+
 ---
 
 ## ❇️ 环境安装
@@ -94,6 +99,7 @@ python app.py
 SuperCCM 坚持 “**简洁、模块化、易上手**” 的开发理念。
 无论是研究者还是开发者，都可以快速入门。
 
+* 📀 [工作原理](docs/doc0_cn.md)：SuperCCM的工作原理
 * 📘 [简明教程](docs/doc1_cn.md)：深入了解 SuperCCM 的使用方法
 * 🧠 [模块编写指南](docs/doc2_cn.md)：学习如何自定义工作流与算法模块
 
