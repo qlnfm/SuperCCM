@@ -29,6 +29,12 @@
 
 ## 💎 How Are the Parameters Computed?
 
+> ### ❗ Note
+>
+> When presenting the parameter values, please also report the version number of SuperCCM together, so that the results can be replicated and compared.
+> 
+> **Current Version: 1.0**
+
 ### 1. CNFL
 
 CNFL is the total length of all nerve fibers.
