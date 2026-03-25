@@ -123,6 +123,7 @@ def get_trunks(paths, skeleton):
     nodes_records = set()
 
     for path, stats, nodes in canvas_list:
+        # print(nodes, stats)
         xs, ys = zip(*path)
         canvas = np.zeros_like(skeleton)
         canvas[xs, ys] = skeleton[xs, ys]
@@ -130,7 +131,7 @@ def get_trunks(paths, skeleton):
         if not nodes & nodes_records:
             nodes_records.update(nodes)
             canvas_all += canvas
-        nodes_records.update(nodes)
+            nodes_records.update(nodes)
 
     return canvas_all
 
