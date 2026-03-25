@@ -1,8 +1,5 @@
 import networkx as nx
 
-from superccm.impl.utils.tools import get_canvas
-from superccm.impl.utils.prune import prune
-
 
 def get_trunk_objs(graph: nx.MultiGraph):
     """

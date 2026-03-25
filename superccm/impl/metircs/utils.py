@@ -1,7 +1,6 @@
 import numpy as np
 import networkx as nx
 from scipy.ndimage import binary_dilation
-from superccm.impl.utils.tools import get_canvas
 
 
 def check_connectivity(mask1: np.ndarray, mask2: np.ndarray) -> str:
@@ -29,8 +28,8 @@ def check_connectivity(mask1: np.ndarray, mask2: np.ndarray) -> str:
         return 'disconnected'
 
 
-def graph_to_skeleton(graph: nx.MultiGraph) -> np.ndarray:
-    canvas = get_canvas(1)
+def graph_to_skeleton(graph: nx.MultiGraph, shape: tuple[int, int]) -> np.ndarray:
+    canvas = np.zeros(shape, np.uint8)
     for u, v, k, data in graph.edges(keys=True, data=True):
         edge_obj = data['obj']
         canvas = canvas + edge_obj.canvas

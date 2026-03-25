@@ -5,6 +5,7 @@ from skimage.morphology import reconstruction
 
 def reconstruct_binary(binary: np.ndarray, skeleton: np.ndarray, max_radius=None):
     """
+    Based on the skeleton and the original mask, the region is reconstructed through distance transformation.
     根据骨架和原始掩膜，通过距离变换进行区域重建。
 
     参数：

@@ -1,4 +1,4 @@
-from superccm.impl.segment import segment
+from superccm.impl.segment.segment import get_binary
 from superccm.impl.skeleton.skeletonize import get_skeleton
 from superccm.impl.trunk.extract_trunks import extract_trunks
 from superccm.impl.graph.graphify import graphify
@@ -10,59 +10,57 @@ from superccm.impl.utils.ccm_vignetting import vignetting_correction
 from superccm.impl.utils.estimate_width import estimate_width
 
 import numpy as np
-import cv2
 import networkx as nx
 
-segmenter = segment.CornealNerveSegmenter()
 
-
-def analysis(image_or_path) -> dict[str, float]:
-    image = read(image_or_path)
+def analysis(image_or_path, um_pixel_ratio=400/384) -> dict[str, float]:
+    image, mask, area = read(image_or_path)
     binary = seg(image)
-    skeleton = skel(binary)
+    skeleton = skel(binary, mask, um_pixel_ratio)
     graph = grfy(image, skeleton)
-    graph, trunks = trunk(graph)
-    metrics = meas(graph, binary, trunks)
+    graph, trunks = trunk(graph, mask)
+    metrics = meas(graph, binary, trunks, area, um_pixel_ratio)
     return metrics
 
 
-def analysis_and_vis(image_or_path) -> tuple[dict[str, float], np.ndarray]:
-    image = read(image_or_path)
+def analysis_and_vis(image_or_path, um_pixel_ratio=400/384) -> tuple[dict[str, float], np.ndarray]:
+    image, mask, area = read(image_or_path)
     binary = seg(image)
-    skeleton = skel(binary)
+    skeleton = skel(binary, mask, um_pixel_ratio)
     graph = grfy(image, skeleton)
-    graph, trunks = trunk(graph)
-    metrics = meas(graph, binary, trunks)
-    image_vis = vis_ACCM(graph, image)
+    graph, trunks = trunk(graph, mask)
+    metrics = meas(graph, binary, trunks, area, um_pixel_ratio)
+    image_vis = vis_ACCM(graph, image.shape[:2], image)
     return metrics, image_vis
 
 
-def read(image_or_path, **kwargs) -> np.ndarray:
-    return read_image(image_or_path, **kwargs)
+def read(image_or_path) -> tuple[np.ndarray, np.ndarray, int]:
+    return read_image(image_or_path)
 
 
 def seg(image: np.ndarray) -> np.ndarray:
-    if not image.shape == (384, 384):
-        raise TypeError('This method is expected to input a grayscale image with a size of 384*384.')
-    return segmenter(image)
+    return get_binary(image)
 
 
-def skel(binary: np.ndarray, **kwargs) -> np.ndarray:
+def skel(binary: np.ndarray, mask: np.ndarray, um_pixel_ratio: float) -> np.ndarray:
     if not np.isin(binary, [0, 255]).all():
         raise ValueError('This method is expected to receive binary images composed solely of 0s and 255s as input.')
-    return get_skeleton(binary, **kwargs)
+    return get_skeleton(binary, mask, um_pixel_ratio)
 
 
-def trunk(graph: nx.MultiGraph) -> tuple[nx.MultiGraph, np.ndarray]:
-    return extract_trunks(graph)
+def trunk(graph: nx.MultiGraph, mask: np.ndarray) -> tuple[nx.MultiGraph, np.ndarray]:
+    return extract_trunks(graph, mask)
 
 
 def grfy(image: np.ndarray, skeleton_image: np.ndarray):
     return graphify(image, skeleton_image)
 
 
-def meas(graph: nx.MultiGraph, binary_image: np.ndarray, trunk_image: np.ndarray, decimal=3) -> dict[str, float]:
-    return get_metrics(graph, binary_image, trunk_image, decimal)
+def meas(
+        graph: nx.MultiGraph, binary_image: np.ndarray, trunk_image: np.ndarray,
+        area, um_pixel_ratio, decimal=3
+) -> dict[str, float]:
+    return get_metrics(graph, binary_image, trunk_image, area, um_pixel_ratio, decimal)
 
 
 def hist_std(image: np.ndarray) -> np.ndarray:

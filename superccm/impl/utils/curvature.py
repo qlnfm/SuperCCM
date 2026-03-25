@@ -170,7 +170,6 @@ if __name__ == '__main__':
     kappa = discrete_curvature(paths)
     print(max(kappa))
     print(curvature_at_point(line1, line2, point, sigma=0.0))
-    # canvas = superccm.api.get_canvas(1)
 
     # 转成整数像素坐标
     img = np.zeros_like(img)

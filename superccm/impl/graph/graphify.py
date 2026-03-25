@@ -3,7 +3,6 @@ import numpy as np
 import networkx as nx
 from superccm.impl.utils.tools import (
     get_split_label, get_coordinates, get_8_neighbors, get_conv2d,
-    get_canvas,
 )
 from superccm.impl.utils.histogram_matching import histogram_standardization
 from superccm.impl.utils.ccm_vignetting import vignetting_correction
@@ -73,7 +72,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
     skeleton_cls = get_conv2d(skeleton / 255, CLASSIFY_KERNEL)
 
     # Convert short links to dots
-    canvas_12 = get_canvas(1)
+    canvas_12 = np.zeros_like(skeleton)
     canvas_12[skeleton_cls == 12] = 255
     for label in get_split_label(canvas_12):
         if cv2.countNonZero(label) <= 2:
@@ -83,7 +82,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
     node_coords = {}
 
     # Add endpoint Node
-    canvas_eps = get_canvas(1)
+    canvas_eps = np.zeros_like(skeleton)
     canvas_eps[skeleton_cls == 11] = 255
     for idx, label in enumerate(get_split_label(canvas_eps)):
         node = GraphComponent(label, 'End')
@@ -93,7 +92,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
             node_coords[coord] = idx
 
     # Add branching point Node
-    canvas_eps = get_canvas(1)
+    canvas_eps = np.zeros_like(skeleton)
     canvas_eps[skeleton_cls >= 13] = 255
     nodes_num = len(g.nodes)
     for idx, label in enumerate(get_split_label(canvas_eps)):
@@ -104,7 +103,7 @@ def skeleton_to_graph(skeleton: np.ndarray) -> nx.MultiGraph:
             node_coords[coord] = idx + nodes_num
 
     # ADD Edge
-    canvas_eps = get_canvas(1)
+    canvas_eps = np.zeros_like(skeleton)
     canvas_eps[skeleton_cls == 12] = 255
     for idx, label in enumerate(get_split_label(canvas_eps)):
         edge_cls = get_conv2d(label / 255, CLASSIFY_KERNEL)
@@ -128,9 +127,9 @@ def graphify(
 ) -> nx.MultiGraph:
     graph = skeleton_to_graph(skeleton)
     # Assignment intensity
-    image_std = histogram_standardization(image)
-    image_vig = vignetting_correction(image_std)
-    intensity_map = estimate_width(image_vig, skeleton)
+    # image_std = histogram_standardization(image)
+    # image_vig = vignetting_correction(image_std)
+    intensity_map = estimate_width(image, skeleton)
     for _, _, _, data in graph.edges(keys=True, data=True):
         edge_obj = data['obj']
         edge_obj.cal_intensity(intensity_map)

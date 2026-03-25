@@ -4,7 +4,6 @@ import numpy as np
 import cv2
 from matplotlib.path import Path
 import matplotlib.patches as patches
-from superccm.impl.utils.tools import get_canvas
 
 
 def vis_graph(g: nx.MultiGraph):
@@ -79,9 +78,9 @@ def vis_graph(g: nx.MultiGraph):
     plt.show()
 
 
-def vis_ACCM(g: nx.MultiGraph, background: np.ndarray | None = None):
+def vis_ACCM(g: nx.MultiGraph, shape: tuple[int, int], background: np.ndarray | None = None):
     """ Presented in an output style similar to ACCMetrics. """
-    background = get_canvas(3) if background is None else background.copy()
+    background = np.zeros(shape, np.uint8) if background is None else background.copy()
     if background.ndim == 2:
         background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)
 

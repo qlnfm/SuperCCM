@@ -33,6 +33,22 @@ def get_canvas(channels=1, hw: tuple[int, int] = CCM_IMAGE_SHAPE):
     return np.zeros(hw, dtype='uint8')
 
 
+def set_edge(canvas: np.ndarray, x: int, value: int) -> np.ndarray:
+    canvas[:x, :] = value  # up
+    canvas[-x:, :] = value  # down
+    canvas[:, :x] = value  # left
+    canvas[:, -x:] = value  # right
+    return canvas
+
+
+def get_edge(mask: np.ndarray, x: int) -> np.ndarray:
+    canvas_ = 255 - mask
+    canvas_ = set_edge(canvas_, 1, 255)
+    x = x - 1
+    canvas_ = cv2.dilate(canvas_, np.ones((x, x), np.uint8))
+    return canvas_
+
+
 def skeletonize_255(image: np.ndarray) -> np.ndarray:
     image = image > 0
     skeleton = skeletonize(image)

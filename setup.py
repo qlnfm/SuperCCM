@@ -8,13 +8,13 @@ def parse_requirements(filename):
 
 setup(
     name='superccm',
-    version='1.0.1',
+    version='1.1.0',
     author='Qincheng Qiao',
     author_email='jugking6688@gmail.com',
-    description='An Open-Source Python Toolkit for Automated Quantification of Corneal Nerve Fibers in Confocal Microscopy Images',
+    description='Open-Source Framework for Corneal Nerve Image Analysis',
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
-    url='https://https://github.com/SummerColdWind',
+    url='https://github.com/qlnfm/SuperCCM',
     packages=find_packages(),
     classifiers=[
         'Development Status :: 1 - Planning',
@@ -28,3 +28,7 @@ setup(
     install_requires=parse_requirements('requirements.txt'),
     include_package_data=True
 )
+
+# pip install --upgrade build twine
+# python setup.py sdist bdist_wheel
+# twine upload dist/*

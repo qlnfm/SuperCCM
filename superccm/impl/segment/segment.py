@@ -1,45 +1,42 @@
-import onnxruntime
+import onnxruntime as ort
 import numpy as np
-import cv2
 import os
 
-CCM_IMAGE_SHAPE = (384, 384)
+session = ort.InferenceSession(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ccm.onnx'))
 
 
-class CornealNerveSegmenter:
-    onnx_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ccm.onnx')
+def get_binary(image: np.ndarray) -> np.ndarray:
+    assert len(image.shape) == 2
 
-    def __init__(self):
-        self.sess_options = onnxruntime.SessionOptions()
-        # If you want to use the GPU, please install onnxruntime-gpu and modify it as follows:
-        # providers = ['CUDAExecutionProvider']
-        self.ort_session = onnxruntime.InferenceSession(
-            self.onnx_path, sess_options=self.sess_options, providers=['CPUExecutionProvider'])
+    h, w = image.shape
+    pad_h = (32 - h % 32) % 32
+    pad_w = (32 - w % 32) % 32
 
-    def seg(self, image: np.ndarray) -> np.ndarray:
-        """
-        Perform segmentation prediction on the input single image.
-        """
-        input_name = self.ort_session.get_inputs()[0].name
-        output_name = self.ort_session.get_outputs()[0].name
+    if pad_h > 0 or pad_w > 0:
+        image = np.pad(
+            image,
+            ((0, pad_h), (0, pad_w)),
+            mode='constant',
+            constant_values=0
+        )
 
-        image_resized = cv2.resize(image, CCM_IMAGE_SHAPE)
+    input_name = session.get_inputs()[0].name
+    output_name = session.get_outputs()[0].name
 
-        input_tensor = image_resized.astype(np.float32) / 255.0
-        input_tensor = np.expand_dims(input_tensor, axis=0)  # 添加批次维度
-        input_tensor = np.expand_dims(input_tensor, axis=0)  # 添加通道维度
+    if np.max(image) > 1:
+        image = image / 255.
+    input_tensor = image.astype(np.float32)
+    input_tensor = np.expand_dims(input_tensor, axis=0)
+    input_tensor = np.expand_dims(input_tensor, axis=0)
 
-        ort_inputs = {input_name: input_tensor}
-        ort_outputs = self.ort_session.run([output_name], ort_inputs)
+    ort_inputs = {input_name: input_tensor}
+    ort_outputs = session.run([output_name], ort_inputs)
 
-        output_data = ort_outputs[0]
+    output_data = ort_outputs[0]
 
-        threshold = 0.5
-        mask = (output_data > threshold).squeeze()
-        mask = (mask * 255).astype(np.uint8)
+    threshold = 0.5
+    mask = (output_data > threshold).squeeze()
+    mask = (mask * 255).astype(np.uint8)
 
-        return mask
-
-    def __call__(self, image: np.ndarray) -> np.ndarray:
-        binary = self.seg(image)
-        return binary
+    mask = mask[:h, :w]
+    return mask

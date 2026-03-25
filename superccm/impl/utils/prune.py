@@ -1,4 +1,3 @@
-import superccm
 import cv2
 import numpy as np
 from scipy.ndimage import label, center_of_mass
@@ -91,18 +90,18 @@ def _prune(skeleton_image, length_thresh=5):
 
     # 查找真分支点像素
     branch_points = extract_true_branch_points(skeleton_image, skeleton_cls >= 13)
-    canvas_bp = superccm.api.get_canvas(1)
+    canvas_bp = np.zeros_like(skeleton_image)
     for r, c in branch_points:
         canvas_bp[r, c] = 255
 
     # 端点像素
-    canvas_ep = superccm.api.get_canvas(1)
+    canvas_ep = np.zeros_like(skeleton_image)
     canvas_ep[skeleton_cls == 11] = 255
     # coords_ep = get_coordinates(skeleton_cls, 11)
 
     # 去除短分支
     skeleton_ = skeleton_image.copy()
-    canvas = superccm.api.get_canvas(1)
+    canvas = np.zeros_like(skeleton_image)
     canvas[skeleton_cls == 12] = 255
     canvas[skeleton_cls == 11] = 255
     canvas[canvas_bp > 0] = 0
@@ -115,7 +114,7 @@ def _prune(skeleton_image, length_thresh=5):
             skeleton_[label > 0] = 0
 
     # 中间像素判定(degree >= 3 and not a true branch point)
-    canvas_mid = superccm.api.get_canvas(1)
+    canvas_mid = np.zeros_like(skeleton_image)
     canvas_mid[skeleton_cls >= 13] = 255
     canvas_mid = canvas_mid - canvas_bp
     h, w = skeleton_.shape
