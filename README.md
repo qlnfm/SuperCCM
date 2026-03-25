@@ -50,6 +50,11 @@ print(metrics)
 ```bash
 python app.py
 ```
+
+#### Preview
+<img src="docs/assets/preview.png" alt="SuperCCM Logo"/>
+
+
 ---
 
 
