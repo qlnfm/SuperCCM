@@ -14,7 +14,7 @@
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-green.svg)](./LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.1167/tvst.14.11.27-2ea44f?logo=doi)](https://doi.org/10.1167/tvst.14.11.27)
 
-**[🔮Online Demo](https://huggingface.co/spaces/jugking6688/SuperCCM-Web)** 
+**[🔮Online Demo](https://huggingface.co/spaces/jugking6688/SuperCCM)** 
 | **[💻Desktop App Download](https://github.com/qlnfm/SuperCCM/releases)**
 | **[📖Documents](docs/document.md)**
 | **[🚩Update Log](docs/update.md)**

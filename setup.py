@@ -8,7 +8,7 @@ def parse_requirements(filename):
 
 setup(
     name='superccm',
-    version='1.1.0',
+    version='1.1.1',
     author='Qincheng Qiao',
     author_email='jugking6688@gmail.com',
     description='Open-Source Framework for Corneal Nerve Image Analysis',
