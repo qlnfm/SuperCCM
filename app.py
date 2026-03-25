@@ -78,8 +78,7 @@ class SuperCCMApp:
 
         count = sum(
             1
-            for root, _, files in os.walk(path)
-            for file in files
+            for file in os.listdir(path)
             if os.path.splitext(file)[1].lower() in supported_exts
         )
 
