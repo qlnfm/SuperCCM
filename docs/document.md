@@ -2,7 +2,7 @@
 
 ## Version 1.1
 
-> coming soon ...
+ - SuperCCM Parameter Calculation Workflow [English](v1.1/how_analysis_en.md) | [简体中文](v1.1/how_analysis_cn.md)
 
 ## Version 1.0
 
