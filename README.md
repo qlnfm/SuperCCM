@@ -52,7 +52,7 @@ python app.py
 ```
 
 #### Preview
-<img src="docs/assets/preview.png" alt="SuperCCM Logo"/>
+<img src="docs/assets/preview2.png" alt="SuperCCM Logo"/>
 
 
 ---
